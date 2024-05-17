@@ -4,8 +4,13 @@ spring:
   profiles:
     active:
       - api
+  sql:
+    init:
+      platform: mysql
+      mode: always # app 시작 시 data.sql에 작성된 코드로 database를 초기화
+
   datasource:
-    url: jdbc:mysql://localhost:3306/mapdb
+    url: jdbc:mysql://localhost:3306/mapdb?useUnicode=true&characterEncoding=utf8&serverTimezone=UTC
     username: root
     password: 1234
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -14,5 +19,7 @@ spring:
       hibernate:
         show_sql: true
     hibernate:
-      ddl-auto: create
+      ddl-auto: create # Hibernate가 데이터베이스 스키마를 자동으로 생성하도록 지정
+
+    defer-datasource-initialization: true
 
