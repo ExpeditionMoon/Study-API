@@ -2,13 +2,13 @@ package moon.kakaoMapAPI.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
+import moon.kakaoMapAPI.config.WebClientConfig;
 import moon.kakaoMapAPI.dto.MartResponseDto;
 import moon.kakaoMapAPI.dto.MartDataDto;
 import moon.kakaoMapAPI.dto.MartLocationDto;
 import moon.kakaoMapAPI.entity.Mart;
 import moon.kakaoMapAPI.repository.MartRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -20,7 +20,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class MartService {
-    private final WebClient webClient;
+    private final WebClientConfig webClientConfig;
     private final MartRepository martRepository;
 
     /**
@@ -46,7 +46,7 @@ public class MartService {
      * @return 주소에 해당하는 위도와 경도를 MartLocationDto에 담음
      */
     public Mono<MartLocationDto> findLocation(String address) {
-        return webClient.get()
+        return webClientConfig.kakaoWebClient().get()
                 .uri(uriBuilder -> uriBuilder.path("/v2/local/search/address.json")
                         .queryParam("query", address)
                         .build())
@@ -64,7 +64,7 @@ public class MartService {
      * @return 검색된 마트 정보를 MartDataDto 리스트로 변환
      */
     public Flux<MartDataDto> searchMarts(double latitude, double longitude, int radius) {
-        return webClient.get()
+        return webClientConfig.kakaoWebClient().get()
                 .uri(uriBuilder -> uriBuilder.path("/v2/local/search/category.json")
                         .queryParam("category_group_code", "MT1")
                         .queryParam("radius", radius)

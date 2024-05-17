@@ -38,4 +38,4 @@ out/
 
 ### add ###
 .DS_Store
-application-kakao.yml
+application-api.yml
