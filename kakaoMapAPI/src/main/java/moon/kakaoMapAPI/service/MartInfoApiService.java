@@ -3,7 +3,7 @@ package moon.kakaoMapAPI.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import moon.kakaoMapAPI.config.WebClientConfig;
-import moon.kakaoMapAPI.dto.MartInfoDto;
+import moon.kakaoMapAPI.dto.MartInfoApiDto;
 import moon.kakaoMapAPI.dto.MartResponseDto;
 import moon.kakaoMapAPI.entity.Mart;
 import moon.kakaoMapAPI.repository.MartRepository;
@@ -16,7 +16,7 @@ import reactor.core.scheduler.Schedulers;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class MartInfoService {
+public class MartInfoApiService {
 
     private final WebClientConfig webClientConfig;
     private final MartRepository martRepository;
@@ -24,14 +24,14 @@ public class MartInfoService {
     @Value("${open.api.key}")
     private String openApiKey;
 
-    public Mono<MartResponseDto> saveMartInfo(MartInfoDto martInfoDto) {
+    public Mono<MartResponseDto> saveMartInfo(MartInfoApiDto martInfoDto) {
         log.info("진입 save");
         return Mono.fromCallable(() -> convertToResponseDto(martInfoDto))
                 .subscribeOn(Schedulers.boundedElastic())
                 .doOnNext(mart -> log.info("saved mart: {}", mart.getMartName()));
     }
 
-    private MartResponseDto convertToResponseDto(MartInfoDto martInfoDto) {
+    private MartResponseDto convertToResponseDto(MartInfoApiDto martInfoDto) {
         log.info("진입 con");
 
         Mart mart = Mart.builder()
@@ -63,7 +63,7 @@ public class MartInfoService {
 //                .flatMap(this::saveMartInfo);
     }
 
-    private Mono<MartInfoDto> getMartDetails() {
+    private Mono<MartInfoApiDto> getMartDetails() {
         log.info("진입 getMart");
 
         return webClientConfig.openApiWebClient().get()
@@ -72,7 +72,7 @@ public class MartInfoService {
 //                        .queryParam("entpId", String.valueOf(entpId))
                         .build())
                 .retrieve()
-                .bodyToMono(MartInfoDto.class)
+                .bodyToMono(MartInfoApiDto.class)
                 .doOnNext(response -> log.info("Received response: {}", response))//
 //                .onErrorResume(e -> Mono.empty());
                 .onErrorResume(e -> {

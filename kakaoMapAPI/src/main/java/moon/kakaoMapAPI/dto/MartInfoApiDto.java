@@ -1,6 +1,5 @@
 package moon.kakaoMapAPI.dto;
 
-import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class MartInfoDto {
+public class MartInfoApiDto {
     private String resultCode; // 결과코드
     private String resultMsg; // 결과메시지
     private String entpId; // 업체_아이디
