@@ -1,6 +1,7 @@
 package moon.kakaoMapAPI.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,21 +9,23 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor
-public class User {
+@AllArgsConstructor
+@Builder
+public class MartInfo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userId;
+    private Long dataId;
 
     @Column(nullable = false)
-    private String userName;
+    private String productName;
 
     @Column(nullable = false)
-    private String address;
+    private String salePrice;
 
-    @Builder
-    public User(String userName, String address) {
-        this.userName = userName;
-        this.address = address;
-    }
+    @Column(nullable = false)
+    private String store;
+
+    @Column(nullable = true)
+    private String manufacturer;
 }

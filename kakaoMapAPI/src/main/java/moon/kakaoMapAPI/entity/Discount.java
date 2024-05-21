@@ -5,20 +5,22 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Entity
 @Getter
 @NoArgsConstructor
-public class Product {
+public class Discount {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long productId;
+    private Long discountId;
 
-    @Column(nullable = false)
-    private String productName;
+    @Column(precision = 3, scale = 1, nullable = false)
+    private BigDecimal discountRate;
 
     @Builder
-    public Product(String productName) {
-        this.productName = productName;
+    public Discount(BigDecimal discountRate) {
+        this.discountRate = discountRate;
     }
 }
