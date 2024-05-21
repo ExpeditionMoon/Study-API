@@ -17,12 +17,8 @@ public class Product {
     @Column(nullable = false)
     private String productName;
 
-    @Column(nullable = true)
-    private String productImgUrl;
-
     @Builder
-    public Product(String productName, String productImgUrl) {
+    public Product(String productName) {
         this.productName = productName;
-        this.productImgUrl = productImgUrl;
     }
 }
