@@ -17,6 +17,9 @@ public class MartProduct {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long martProductId;
 
+    @Column(nullable = true)
+    private Long stock;
+
     @Column(nullable = false)
     private Long price;
 
@@ -27,7 +30,11 @@ public class MartProduct {
     @JoinColumn(name = "join_id")
     private JoinMart joinMart;
 
-    @ManyToOne(fetch =FetchType.LAZY)
-    @JoinColumn(name="product_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id")
     private Product product;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "discount_id")
+    private Discount discount;
 }

@@ -78,20 +78,23 @@ public class MartService {
     }
 
     /**
-     * 검색된 마트 정보를 저장
+     * 검색된 마트 정보를 저장 및 JoinMart에 해당 마트가 있다면 연결
      *
      * @param contentDto 저장할 마트 정보
      * @return MartResponseDto로 저장된 마트 정보 반환
      */
     public Mono<MartResponseDto> saveMart(MartDataDto contentDto) {
-        return Mono.fromCallable(() -> {
-            Mart mart = Mart.builder()
-                    .martName(contentDto.getAddress())
-                    .address(contentDto.getRoadAddress())
-                    .build();
-            Mart savedMart = martRepository.save(mart);
-            return new MartResponseDto(savedMart.getMartName(), savedMart.getAddress());
-        }).subscribeOn(Schedulers.boundedElastic());
+        return Mono.fromCallable(() -> martRepository.findJoinMartByNameContaining(contentDto.getPlaceName()))
+                .subscribeOn(Schedulers.boundedElastic())
+                .map(joinMart -> {
+                    Mart mart = Mart.builder()
+                            .martName(contentDto.getPlaceName())
+                            .martAddress(contentDto.getRoadAddress())
+                            .joinMart(joinMart.orElse(null))
+                            .build();
+                    return martRepository.save(mart);
+                })
+                .map(savedMart -> new MartResponseDto((savedMart.getMartName()), savedMart.getMartAddress()));
     }
 
     /**
@@ -134,10 +137,10 @@ public class MartService {
             for (JsonNode document : jsonNode.get("documents")) {
                 MartDataDto mart = new MartDataDto(
                         document.get("id").asText(),
-                        document.get("distance").asText(),
                         document.get("place_name").asText(),
                         document.get("address_name").asText(),
                         document.get("road_address_name").asText(),
+                        document.get("distance").asText(),
                         document.get("phone").asText()
                 );
                 marts.add(mart);

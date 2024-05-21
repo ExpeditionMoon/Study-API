@@ -36,7 +36,7 @@ public class MartInfoApiService {
 
         Mart mart = Mart.builder()
                 .martName(martInfoDto.getEntpName())
-                .address(martInfoDto.getRoadAddrBasic())
+                .martAddress(martInfoDto.getRoadAddrBasic())
                 .entpId(martInfoDto.getEntpId())
                 .entpAreaCode(martInfoDto.getEntpAreaCode())
                 .entpTelNo(martInfoDto.getEntpTelNo())
@@ -45,11 +45,11 @@ public class MartInfoApiService {
         log.info("진입 con2");
 
         return new MartResponseDto(
-            savedMart.getMartName(),
-            savedMart.getAddress(),
-            savedMart.getEntpId(),
-            savedMart.getEntpAreaCode(),
-            savedMart.getEntpTelNo());
+                savedMart.getMartName(),
+                savedMart.getMartAddress(),
+                savedMart.getEntpId(),
+                savedMart.getEntpAreaCode(),
+                savedMart.getEntpTelNo());
     }
 
     public Flux<MartResponseDto> getAndSaveMartInfo() {

@@ -13,16 +13,16 @@ import java.math.RoundingMode;
 public class DiscountInfoDto {
     private Long productId;
     private String productName;
-    private Long martId;
+    private Long joinId;
     private Long stock;
     private BigDecimal price;
     private BigDecimal discountRate;
     private Long finalPrice;
 
-    public DiscountInfoDto(Long productId, String productName, Long martId, Long stock, Long price, BigDecimal discountRate) {
+    public DiscountInfoDto(Long productId, String productName, Long joinId, Long stock, Long price, BigDecimal discountRate) {
         this.productId = productId;
         this.productName = productName;
-        this.martId = martId;
+        this.joinId = joinId;
         this.stock = stock;
         this.price = BigDecimal.valueOf(price);
         this.discountRate = (discountRate != null) ? discountRate : BigDecimal.ZERO;

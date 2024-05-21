@@ -15,7 +15,7 @@ public class JoinMart {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long JoinId;
+    private Long joinId;
 
     @Column(nullable = false)
     private String store;

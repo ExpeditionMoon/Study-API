@@ -9,9 +9,8 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
@@ -20,14 +19,11 @@ public class User {
     private String userName;
 
     @Column(nullable = false)
-    private String password;
-
-    @Column(nullable = false)
     private String address;
 
-    public User(String userName, String password, String address) {
+    @Builder
+    public User(String userName, String address) {
         this.userName = userName;
-        this.password = password;
         this.address = address;
     }
 }

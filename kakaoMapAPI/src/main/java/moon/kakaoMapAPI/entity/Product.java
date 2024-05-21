@@ -1,7 +1,6 @@
 package moon.kakaoMapAPI.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,8 +8,6 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class Product {
 
     @Id
@@ -23,7 +20,7 @@ public class Product {
     @Column(nullable = true)
     private String productImgUrl;
 
-    /* 더미 데이터 삽입에 사용 */
+    @Builder
     public Product(String productName, String productImgUrl) {
         this.productName = productName;
         this.productImgUrl = productImgUrl;
