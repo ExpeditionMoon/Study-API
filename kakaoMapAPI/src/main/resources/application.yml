@@ -3,7 +3,7 @@ spring:
     name: kakaoMapAPI
   profiles:
     active:
-      - kakao
+      - api
   datasource:
     url: jdbc:mysql://localhost:3306/mapdb
     username: root
