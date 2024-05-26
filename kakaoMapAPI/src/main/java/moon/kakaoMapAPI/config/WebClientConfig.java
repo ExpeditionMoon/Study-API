@@ -7,6 +7,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.DefaultUriBuilderFactory;
 
 @Configuration
 @EnableAsync
@@ -14,6 +15,9 @@ public class WebClientConfig {
 
     @Value("${kakao.api.key}")
     private String kakaoRestApiKey;
+
+    @Value("${open.api.base-url}")
+    private String baseUrl;
 
     @Bean
     public WebClient kakaoWebClient() {
@@ -26,11 +30,12 @@ public class WebClientConfig {
 
     @Bean
     public WebClient openApiWebClient() {
+        DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory(baseUrl);
+        factory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.VALUES_ONLY);
+
         return WebClient.builder()
-                .baseUrl("http://openapi.price.go.kr/openApiImpl/ProductPriceInfoService/getStoreInfoSvc.do")
-//                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_XML_VALUE)
+                .uriBuilderFactory(factory)
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-//                .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_XML_VALUE) //
                 .build();
     }
 }

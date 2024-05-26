@@ -24,16 +24,48 @@ public class MartInfoApiService {
     @Value("${open.api.key}")
     private String openApiKey;
 
+    public Mono<String> fetchInfo() {
+        return webClientConfig.openApiWebClient().get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/getStoreInfoSvc.do")
+                        .queryParam("ServiceKey", openApiKey)
+                        .build())
+                .retrieve()
+                .bodyToMono(String.class);
+    }
+
+    public Mono<String> fetchProduct() {
+        return webClientConfig.openApiWebClient().get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/getProductInfoSvc.do")
+                        .queryParam("ServiceKey", openApiKey)
+                        .build())
+                .retrieve()
+                .bodyToMono(String.class);
+    }
+
+    public Flux<MartResponseDto> getAndSaveMartInfo() {
+        return getMartDetails()
+                .flatMap(this::saveMartInfo)
+                .flatMapMany(Flux::just);
+    }
+
+    private Mono<MartInfoApiDto> getMartDetails() {
+        return webClientConfig.openApiWebClient().get()
+                .uri(uriBuilder -> uriBuilder
+                        .queryParam("ServiceKey", openApiKey)
+                        .build())
+                .retrieve()
+                .bodyToMono(MartInfoApiDto.class)
+                .onErrorResume(e -> Mono.empty());
+    }
+
     public Mono<MartResponseDto> saveMartInfo(MartInfoApiDto martInfoDto) {
-        log.info("진입 save");
         return Mono.fromCallable(() -> convertToResponseDto(martInfoDto))
-                .subscribeOn(Schedulers.boundedElastic())
-                .doOnNext(mart -> log.info("saved mart: {}", mart.getMartName()));
+                .subscribeOn(Schedulers.boundedElastic());
     }
 
     private MartResponseDto convertToResponseDto(MartInfoApiDto martInfoDto) {
-        log.info("진입 con");
-
         Mart mart = Mart.builder()
                 .martName(martInfoDto.getEntpName())
                 .martAddress(martInfoDto.getRoadAddrBasic())
@@ -42,7 +74,6 @@ public class MartInfoApiService {
                 .entpTelNo(martInfoDto.getEntpTelNo())
                 .build();
         Mart savedMart = martRepository.save(mart);
-        log.info("진입 con2");
 
         return new MartResponseDto(
                 savedMart.getMartName(),
@@ -50,34 +81,5 @@ public class MartInfoApiService {
                 savedMart.getEntpId(),
                 savedMart.getEntpAreaCode(),
                 savedMart.getEntpTelNo());
-    }
-
-    public Flux<MartResponseDto> getAndSaveMartInfo() {
-        log.info("진입 get");
-
-        return getMartDetails()
-                .flatMap(this::saveMartInfo)
-                .flatMapMany(Flux::just);
-//        return Flux.range(1, 1)
-//                .flatMap(this::getMartDetails)
-//                .flatMap(this::saveMartInfo);
-    }
-
-    private Mono<MartInfoApiDto> getMartDetails() {
-        log.info("진입 getMart");
-
-        return webClientConfig.openApiWebClient().get()
-                .uri(uriBuilder -> uriBuilder
-                        .queryParam("ServiceKey", openApiKey)
-//                        .queryParam("entpId", String.valueOf(entpId))
-                        .build())
-                .retrieve()
-                .bodyToMono(MartInfoApiDto.class)
-                .doOnNext(response -> log.info("Received response: {}", response))//
-//                .onErrorResume(e -> Mono.empty());
-                .onErrorResume(e -> {
-                    log.error("Error fetching mart details: {}", e.getMessage());
-                    return Mono.empty();
-                });
     }
 }
