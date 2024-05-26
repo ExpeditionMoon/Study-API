@@ -20,6 +20,9 @@ spring:
         show_sql: true
     hibernate:
       ddl-auto: create # Hibernate가 데이터베이스 스키마를 자동으로 생성하도록 지정
-
+    open-in-view: false
     defer-datasource-initialization: true
 
+open:
+  api:
+    base-url: http://openapi.price.go.kr/openApiImpl/ProductPriceInfoService
