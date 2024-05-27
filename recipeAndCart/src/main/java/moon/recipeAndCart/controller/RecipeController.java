@@ -13,8 +13,8 @@ public class RecipeController {
 
     private final RecipeService recipeService;
 
-    @GetMapping
-    public Mono<String> getPriceInfo(@RequestParam("menu") String menu) {
-        return recipeService.fetchMenu(menu);
+    @GetMapping("/recipe")
+    public Mono<String> fetchAndSaveRecipes(@RequestParam("menu") String menu) {
+        return recipeService.fetchAndSaveRecipes(menu);
     }
 }
