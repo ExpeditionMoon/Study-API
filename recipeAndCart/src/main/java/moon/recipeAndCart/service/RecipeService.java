@@ -1,14 +1,15 @@
 package moon.recipeAndCart.service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import moon.recipeAndCart.config.WebClientConfig;
 import moon.recipeAndCart.dto.RecipeApiDto;
 import moon.recipeAndCart.dto.RecipeApiResponse;
 import moon.recipeAndCart.dto.RecipeManualDto;
 import moon.recipeAndCart.entity.Recipe;
 import moon.recipeAndCart.entity.RecipeManual;
+import moon.recipeAndCart.entity.RecipeParts;
 import moon.recipeAndCart.repository.RecipeManualRepository;
+import moon.recipeAndCart.repository.RecipePartsRepository;
 import moon.recipeAndCart.repository.RecipeRepository;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -17,14 +18,13 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class RecipeService {
 
     private final WebClientConfig webClientConfig;
     private final RecipeRepository recipeRepository;
     private final RecipeManualRepository manualRepository;
+    private final RecipePartsRepository partsRepository;
 
-    // TODO. 재료 저장 로직 구현
     public Mono<String> fetchAndSaveRecipes(String menu) {
         return fetchMenu(menu)
                 .doOnNext(this::saveRecipesFromApiResponse)
@@ -46,6 +46,7 @@ public class RecipeService {
             Recipe recipe = convertToRecipeEntity(apiDto);
             recipeRepository.save(recipe);
             saveManuals(apiDto.getManual(), recipe);
+            saveParts(apiDto.extractRecipeParts(), recipe);
         });
     }
 
@@ -58,6 +59,16 @@ public class RecipeService {
                     .recipe(savedRecipe)
                     .build();
             manualRepository.save(manual);
+        });
+    }
+
+    private void saveParts(List<String> parts, Recipe savedRecipe) {
+        parts.forEach(part -> {
+            RecipeParts recipePart = RecipeParts.builder()
+                    .partsName(part)
+                    .recipe(savedRecipe)
+                    .build();
+            partsRepository.save(recipePart);
         });
     }
 

@@ -1,6 +1,7 @@
 package moon.recipeAndCart.entity;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -18,4 +19,11 @@ public class RecipeParts {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recipe_id")
     private Recipe recipe;
+
+    @Builder
+
+    public RecipeParts(String partsName, Recipe recipe) {
+        this.partsName = partsName;
+        this.recipe = recipe;
+    }
 }

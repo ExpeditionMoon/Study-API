@@ -44,5 +44,22 @@ public class RecipeApiDto {
             }
         }
     }
+
+    public List<String> extractRecipeParts() {
+        List<String> partsList = new ArrayList<>();
+        if (this.recipeParts != null && !this.recipeParts.isEmpty()) {
+            String[] partsArr = this.recipeParts.split("[\n,]");
+            for (String part : partsArr) {
+                if (!part.isEmpty() && !part.startsWith("고명") &&
+                        !part.startsWith("양념장") && !part.startsWith("양념") &&
+                        !part.startsWith("●") && !part.startsWith("•")
+                ) {
+                    String cleanedPart = part.replaceAll("\\(.*?\\)|\\d+g|\\d+ml|\\d+개|\\d+큰술|\\d+작은술|\\d+장", "").trim();
+                    partsList.add(cleanedPart);
+                }
+            }
+        }
+        return partsList;
+    }
 }
 
