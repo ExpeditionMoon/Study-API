@@ -1,4 +1,4 @@
-package moon.recipeAndCart.dto;
+package moon.recipeAndCart.dto.official;
 
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import moon.recipeAndCart.dto.common.RecipeManualDto;
 
 import java.util.ArrayList;
 import java.util.List;

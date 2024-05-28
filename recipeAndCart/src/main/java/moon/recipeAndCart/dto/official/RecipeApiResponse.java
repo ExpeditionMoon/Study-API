@@ -1,4 +1,4 @@
-package moon.recipeAndCart.dto;
+package moon.recipeAndCart.dto.official;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

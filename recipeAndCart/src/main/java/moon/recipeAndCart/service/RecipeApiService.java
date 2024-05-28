@@ -2,9 +2,9 @@ package moon.recipeAndCart.service;
 
 import lombok.RequiredArgsConstructor;
 import moon.recipeAndCart.config.WebClientConfig;
-import moon.recipeAndCart.dto.RecipeApiDto;
-import moon.recipeAndCart.dto.RecipeApiResponse;
-import moon.recipeAndCart.dto.RecipeManualDto;
+import moon.recipeAndCart.dto.official.RecipeApiDto;
+import moon.recipeAndCart.dto.official.RecipeApiResponse;
+import moon.recipeAndCart.dto.common.RecipeManualDto;
 import moon.recipeAndCart.entity.Recipe;
 import moon.recipeAndCart.entity.RecipeManual;
 import moon.recipeAndCart.entity.RecipeParts;
@@ -20,7 +20,7 @@ import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
-public class RecipeService {
+public class RecipeApiService {
 
     private final WebClientConfig webClientConfig;
     private final RecipeRepository recipeRepository;
