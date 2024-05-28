@@ -21,4 +21,4 @@ spring:
     open-in-view: false
 recipe:
   base-url: https://openapi.foodsafetykorea.go.kr/api/
-  req-type: /COOKRCP01/json/1/1000
+  req-type: /COOKRCP01/json/1/100

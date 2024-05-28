@@ -25,16 +25,22 @@ public class RecipeService {
     private final RecipeManualRepository manualRepository;
     private final RecipePartsRepository partsRepository;
 
-    public Mono<String> fetchAndSaveRecipes(String menu) {
-        return fetchMenu(menu)
+    public Mono<String> fetchAndSaveRecipesByMenu(String menu) {
+        return fetchMenu("RCP_NM", menu)
                 .doOnNext(this::saveRecipesFromApiResponse)
                 .map(response -> "레시피를 성공적으로 저장했습니다.");
     }
 
-    private Mono<RecipeApiResponse> fetchMenu(String menu) {
+    public Mono<String> fetchAndSaveRecipesByType(String type) {
+        return fetchMenu("RCP_PAT2", type)
+                .doOnNext(this::saveRecipesFromApiResponse)
+                .map(response -> "레시피를 성공적으로 저장했습니다.");
+    }
+
+    private Mono<RecipeApiResponse> fetchMenu(String key, String value) {
         return webClientConfig.recipeWebClient().get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/RCP_NM=" + menu)
+                        .path("/" + key + "=" + value)
                         .build())
                 .retrieve()
                 .bodyToMono(RecipeApiResponse.class);
