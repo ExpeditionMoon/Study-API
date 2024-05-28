@@ -1,16 +1,15 @@
-package moon.recipeAndCart.dto.custom;
+package moon.recipeAndCart.dto.common;
 
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import moon.recipeAndCart.dto.common.RecipeManualDto;
 import moon.recipeAndCart.entity.Recipe;
 
 import java.util.List;
 
 @Data
 @NoArgsConstructor
-public class RecipeCustomDto {
+public class RecipeResponseDto {
     private String recipeName;
     private String recipeType;
     private String recipeNaTip;
@@ -18,7 +17,7 @@ public class RecipeCustomDto {
     private List<RecipePartsDto> recipePartsList;
 
     @Builder
-    public RecipeCustomDto(String recipeName, String recipeType, String recipeNaTip, List<RecipeManualDto> recipeManualList, List<RecipePartsDto> recipePartsList) {
+    public RecipeResponseDto(String recipeName, String recipeType, String recipeNaTip, List<RecipeManualDto> recipeManualList, List<RecipePartsDto> recipePartsList) {
         this.recipeName = recipeName;
         this.recipeType = recipeType;
         this.recipeNaTip = recipeNaTip;
@@ -26,8 +25,8 @@ public class RecipeCustomDto {
         this.recipePartsList = recipePartsList;
     }
 
-    public static RecipeCustomDto customDto(Recipe recipe, List<RecipeManualDto> manualList, List<RecipePartsDto> partsList) {
-        return RecipeCustomDto.builder()
+    public static RecipeResponseDto toResponseDto(Recipe recipe, List<RecipeManualDto> manualList, List<RecipePartsDto> partsList) {
+        return RecipeResponseDto.builder()
                 .recipeName(recipe.getRecipeName())
                 .recipeType(recipe.getRecipeType())
                 .recipeNaTip(recipe.getRecipeNaTip())

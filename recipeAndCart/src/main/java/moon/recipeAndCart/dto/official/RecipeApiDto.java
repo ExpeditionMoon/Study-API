@@ -7,9 +7,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import moon.recipeAndCart.dto.common.RecipeManualDto;
-import moon.recipeAndCart.dto.custom.RecipePartsDto;
+import moon.recipeAndCart.dto.common.RecipePartsDto;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -41,6 +42,8 @@ public class RecipeApiDto {
                 while (manual.size() < step) {
                     manual.add(new RecipeManualDto());
                 }
+                RecipeManualDto manualDto = manual.get(step - 1);
+                manualDto.setStep(step);
                 if (key.startsWith("MANUAL_IMG")) {
                     manual.get(step - 1).setManualImgUrl(value.toString());
                 } else {
@@ -52,26 +55,27 @@ public class RecipeApiDto {
 
     public List<RecipePartsDto> extractRecipeParts() {
         List<RecipePartsDto> partsList = new ArrayList<>();
-        if (this.recipeParts != null && !this.recipeParts.isEmpty()) {
-            String[] partsArr = this.recipeParts.split("[\n,]");
-            Pattern pattern = Pattern.compile("(.+?)\\s*(\\d+\\s*[gml개큰술작은술장]*)");
-            for (String part : partsArr) {
-                if (!part.isEmpty() && !part.startsWith("고명") &&
+        if (recipeParts == null || recipeParts.isEmpty()) {
+            return partsList;
+        }
+        String[] partsArr = this.recipeParts.split("[\n,]");
+        Pattern pattern = Pattern.compile("(.+?)\\s*(\\d+\\s*[gml개큰술작은술장]*)");
+
+        return Arrays.stream(partsArr)
+                .filter(part -> !part.isEmpty() && !part.startsWith("고명") &&
                         !part.startsWith("양념장") && !part.startsWith("양념") &&
-                        !part.startsWith("●") && !part.startsWith("•")
-                ) {
+                        !part.startsWith("●") && !part.startsWith("•"))
+                .map(part -> {
                     Matcher matcher = pattern.matcher(part);
                     if (matcher.find()) {
                         String partsName = matcher.group(1).trim();
                         String partsQuantity = matcher.group(2).trim();
-                        partsList.add(new RecipePartsDto(partsName, partsQuantity));
+                        return new RecipePartsDto(partsName, partsQuantity);
                     } else {
-                        partsList.add(new RecipePartsDto(part,null));
+                        return new RecipePartsDto(part, null);
                     }
-                }
-            }
-        }
-        return partsList;
+                })
+                .toList();
     }
 }
 

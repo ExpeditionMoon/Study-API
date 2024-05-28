@@ -2,6 +2,7 @@ package moon.recipeAndCart.service;
 
 import lombok.RequiredArgsConstructor;
 import moon.recipeAndCart.config.WebClientConfig;
+import moon.recipeAndCart.dto.common.RecipeResponseDto;
 import moon.recipeAndCart.dto.official.RecipeApiDto;
 import moon.recipeAndCart.dto.official.RecipeApiResponse;
 import moon.recipeAndCart.entity.Recipe;
@@ -15,28 +16,27 @@ import java.util.*;
 @RequiredArgsConstructor
 public class RecipeApiService {
 
+    private static final int PAGE_SIZE = 100;
     private final WebClientConfig webClientConfig;
     private final RecipeRepository recipeRepository;
     private final RecipeCommonService commonService;
-
-    private static final int PAGE_SIZE = 100;
     private final Map<String, Integer> menuPageMap = new HashMap<>();
     private final Map<String, Integer> typePageMap = new HashMap<>();
 
-    public Mono<String> fetchAndSaveRecipesByMenu(String menu) {
+    public Mono<List<RecipeResponseDto>> fetchAndSaveRecipesByMenu(String menu) {
         int currentPage = menuPageMap.getOrDefault(menu, 1);
         return fetchMenu("RCP_NM", menu, currentPage, PAGE_SIZE)
-                .doOnNext(this::saveRecipesFromApiResponse)
-                .doOnNext(response -> menuPageMap.put(menu, currentPage + 1))
-                .map(response -> "레시피를 성공적으로 저장했습니다.");
+                .flatMap(response -> saveRecipesFromApiResponse(response)
+                        .doOnNext(savedRecipes -> menuPageMap.put(menu, currentPage + 1))
+                        .map(this::convertToRecipeResponseDtos));
     }
 
-    public Mono<String> fetchAndSaveRecipesByType(String type) {
+    public Mono<List<RecipeResponseDto>> fetchAndSaveRecipesByType(String type) {
         int currentPage = typePageMap.getOrDefault(type, 1);
         return fetchMenu("RCP_PAT2", type, currentPage, PAGE_SIZE)
-                .doOnNext(this::saveRecipesFromApiResponse)
-                .doOnNext(response -> typePageMap.put(type, currentPage + 1))
-                .map(response -> "레시피를 성공적으로 저장했습니다.");
+                .flatMap(response -> saveRecipesFromApiResponse(response)
+                        .doOnNext(savedRecipes -> typePageMap.put(type, currentPage + 1))
+                        .map(this::convertToRecipeResponseDtos));
     }
 
     private Mono<RecipeApiResponse> fetchMenu(String key, String value, int page, int size) {
@@ -51,9 +51,11 @@ public class RecipeApiService {
                 .bodyToMono(RecipeApiResponse.class);
     }
 
-    private void saveRecipesFromApiResponse(RecipeApiResponse response) {
+    private Mono<List<Recipe>> saveRecipesFromApiResponse(RecipeApiResponse response) {
         List<RecipeApiDto> apiDtos = response.getCookrcp01().getRow();
         Set<Long> existingRecipeApiNos = new HashSet<>(recipeRepository.findAllRecipeApiNos());
+        List<Recipe> savedRecipes = new ArrayList<>();
+
         apiDtos.stream()
                 .filter(apiDto -> !existingRecipeApiNos.contains(apiDto.getRecipeApiNo()))
                 .forEach(apiDto -> {
@@ -61,7 +63,9 @@ public class RecipeApiService {
                     recipeRepository.save(recipe);
                     commonService.saveManuals(apiDto.getManual(), recipe);
                     commonService.saveParts(apiDto.extractRecipeParts(), recipe);
+                    savedRecipes.add(recipe);
                 });
+        return Mono.just(savedRecipes);
     }
 
     private Recipe convertToRecipeEntity(RecipeApiDto apiDto) {
@@ -71,5 +75,15 @@ public class RecipeApiService {
                 .recipeType(apiDto.getRecipeType())
                 .recipeNaTip(apiDto.getRecipeNaTip())
                 .build();
+    }
+
+    private List<RecipeResponseDto> convertToRecipeResponseDtos(List<Recipe> recipes) {
+        return recipes.stream()
+                .map(recipe -> RecipeResponseDto.toResponseDto(
+                        recipe,
+                        commonService.findManualsByRecipe(recipe),
+                        commonService.findPartsByRecipe(recipe)
+                ))
+                .toList();
     }
 }

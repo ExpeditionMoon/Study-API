@@ -2,7 +2,7 @@ package moon.recipeAndCart.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import moon.recipeAndCart.dto.custom.RecipeCustomDto;
+import moon.recipeAndCart.dto.common.RecipeResponseDto;
 import moon.recipeAndCart.entity.Recipe;
 import moon.recipeAndCart.repository.RecipeRepository;
 import org.springframework.stereotype.Service;
@@ -15,7 +15,7 @@ public class RecipeCustomService {
     private final RecipeCommonService commonService;
 
     @Transactional
-    public RecipeCustomDto saveRecipe(RecipeCustomDto dto) {
+    public RecipeResponseDto saveRecipe(RecipeResponseDto dto) {
         Recipe recipe = Recipe.builder()
                 .recipeName(dto.getRecipeName())
                 .recipeType(dto.getRecipeType())
@@ -25,7 +25,7 @@ public class RecipeCustomService {
         commonService.saveManuals(dto.getRecipeManualList(), recipe);
         commonService.saveParts(dto.getRecipePartsList(), recipe);
 
-        return RecipeCustomDto.customDto(
+        return RecipeResponseDto.toResponseDto(
                 recipe,
                 dto.getRecipeManualList(),
                 dto.getRecipePartsList());

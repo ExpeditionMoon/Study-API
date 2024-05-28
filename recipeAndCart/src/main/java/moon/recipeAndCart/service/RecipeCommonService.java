@@ -2,7 +2,7 @@ package moon.recipeAndCart.service;
 
 import lombok.RequiredArgsConstructor;
 import moon.recipeAndCart.dto.common.RecipeManualDto;
-import moon.recipeAndCart.dto.custom.RecipePartsDto;
+import moon.recipeAndCart.dto.common.RecipePartsDto;
 import moon.recipeAndCart.entity.Recipe;
 import moon.recipeAndCart.entity.RecipeManual;
 import moon.recipeAndCart.entity.RecipeParts;
@@ -22,7 +22,7 @@ public class RecipeCommonService {
     public void saveManuals(List<RecipeManualDto> manuals, Recipe savedRecipe) {
         manuals.forEach(manualDto -> {
             RecipeManual manual = RecipeManual.builder()
-                    .step((long) manualDto.getStep())
+                    .step(Long.valueOf(manualDto.getStep()))
                     .manualTxt(manualDto.getManualTxt())
                     .manualImgUrl(manualDto.getManualImgUrl())
                     .recipe(savedRecipe)
@@ -40,5 +40,24 @@ public class RecipeCommonService {
                     .build();
             partsRepository.save(recipePart);
         });
+    }
+
+    public List<RecipeManualDto> findManualsByRecipe(Recipe recipe) {
+        List<RecipeManual> manuals = manualRepository.findByRecipeRecipeId(recipe.getRecipeId());
+        return manuals.stream()
+                .map(manual -> new RecipeManualDto(
+                        manual.getStep().intValue(),
+                        manual.getManualTxt(),
+                        manual.getManualImgUrl()))
+                .toList();
+    }
+
+    public List<RecipePartsDto> findPartsByRecipe(Recipe recipe) {
+        List<RecipeParts> parts = partsRepository.findByRecipeRecipeId(recipe.getRecipeId());
+        return parts.stream()
+                .map(part -> new RecipePartsDto(
+                        part.getPartsName(),
+                        part.getPartsQuantity()))
+                .toList();
     }
 }
