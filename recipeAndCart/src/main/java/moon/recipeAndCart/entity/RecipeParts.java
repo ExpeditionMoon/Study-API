@@ -16,14 +16,17 @@ public class RecipeParts {
     @Column(nullable = false)
     private String partsName;
 
+    @Column(nullable = true)
+    private String partsQuantity;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recipe_id")
     private Recipe recipe;
 
     @Builder
-
-    public RecipeParts(String partsName, Recipe recipe) {
+    public RecipeParts(String partsName, String partsQuantity, Recipe recipe) {
         this.partsName = partsName;
+        this.partsQuantity = partsQuantity;
         this.recipe = recipe;
     }
 }

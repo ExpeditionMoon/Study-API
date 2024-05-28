@@ -24,22 +24,22 @@ public class Recipe {
     @Column(nullable = false)
     private String recipeType;
 
-    @Column(nullable = false)
-    private String recipeParts;
-
     @Column(nullable = true)
     private String recipeNaTip;
 
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<RecipeManual> recipeManual;
 
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<RecipeParts> recipeParts;
+
     @Builder
-    public Recipe(Long recipeApiNo, String recipeName, String recipeType, String recipeParts, String recipeNaTip, List<RecipeManual> recipeManual) {
+    public Recipe(Long recipeApiNo, String recipeName, String recipeType, String recipeNaTip, List<RecipeManual> recipeManual, List<RecipeParts> recipeParts) {
         this.recipeApiNo = recipeApiNo;
         this.recipeName = recipeName;
         this.recipeType = recipeType;
-        this.recipeParts = recipeParts;
         this.recipeNaTip = recipeNaTip;
         this.recipeManual = recipeManual;
+        this.recipeParts = recipeParts;
     }
 }

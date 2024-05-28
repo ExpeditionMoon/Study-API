@@ -46,6 +46,7 @@ public class RecipeApiDto {
         }
     }
 
+    // TODO. 재료의 양을 분리해서 넣을 수 있도록 수정
     public List<String> extractRecipeParts() {
         List<String> partsList = new ArrayList<>();
         if (this.recipeParts != null && !this.recipeParts.isEmpty()) {

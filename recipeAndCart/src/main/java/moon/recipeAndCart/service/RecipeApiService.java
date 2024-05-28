@@ -69,7 +69,6 @@ public class RecipeApiService {
                 .recipeApiNo(apiDto.getRecipeApiNo())
                 .recipeName(apiDto.getRecipeName())
                 .recipeType(apiDto.getRecipeType())
-                .recipeParts(apiDto.getRecipeParts())
                 .recipeNaTip(apiDto.getRecipeNaTip())
                 .build();
     }

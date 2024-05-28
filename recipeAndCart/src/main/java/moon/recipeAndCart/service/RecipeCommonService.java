@@ -2,6 +2,7 @@ package moon.recipeAndCart.service;
 
 import lombok.RequiredArgsConstructor;
 import moon.recipeAndCart.dto.common.RecipeManualDto;
+import moon.recipeAndCart.dto.custom.RecipePartsDto;
 import moon.recipeAndCart.entity.Recipe;
 import moon.recipeAndCart.entity.RecipeManual;
 import moon.recipeAndCart.entity.RecipeParts;
@@ -33,7 +34,18 @@ public class RecipeCommonService {
     public void saveParts(List<String> parts, Recipe savedRecipe) {
         parts.forEach(part -> {
             RecipeParts recipePart = RecipeParts.builder()
-                    .partsName(part)
+                    .partsName(String.valueOf(part))
+                    .recipe(savedRecipe)
+                    .build();
+            partsRepository.save(recipePart);
+        });
+    }
+
+    public void saveCustomParts(List<RecipePartsDto> parts, Recipe savedRecipe) {
+        parts.forEach(part -> {
+            RecipeParts recipePart = RecipeParts.builder()
+                    .partsName(String.valueOf(part))
+                    .partsQuantity(part.getPartsQuantity())
                     .recipe(savedRecipe)
                     .build();
             partsRepository.save(recipePart);
