@@ -7,9 +7,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import moon.recipeAndCart.dto.common.RecipeManualDto;
+import moon.recipeAndCart.dto.custom.RecipePartsDto;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -46,18 +50,24 @@ public class RecipeApiDto {
         }
     }
 
-    // TODO. 재료의 양을 분리해서 넣을 수 있도록 수정
-    public List<String> extractRecipeParts() {
-        List<String> partsList = new ArrayList<>();
+    public List<RecipePartsDto> extractRecipeParts() {
+        List<RecipePartsDto> partsList = new ArrayList<>();
         if (this.recipeParts != null && !this.recipeParts.isEmpty()) {
             String[] partsArr = this.recipeParts.split("[\n,]");
+            Pattern pattern = Pattern.compile("(.+?)\\s*(\\d+\\s*[gml개큰술작은술장]*)");
             for (String part : partsArr) {
                 if (!part.isEmpty() && !part.startsWith("고명") &&
                         !part.startsWith("양념장") && !part.startsWith("양념") &&
                         !part.startsWith("●") && !part.startsWith("•")
                 ) {
-                    String cleanedPart = part.replaceAll("\\(.*?\\)|\\d+g|\\d+ml|\\d+개|\\d+큰술|\\d+작은술|\\d+장", "").trim();
-                    partsList.add(cleanedPart);
+                    Matcher matcher = pattern.matcher(part);
+                    if (matcher.find()) {
+                        String partsName = matcher.group(1).trim();
+                        String partsQuantity = matcher.group(2).trim();
+                        partsList.add(new RecipePartsDto(partsName, partsQuantity));
+                    } else {
+                        partsList.add(new RecipePartsDto(part,null));
+                    }
                 }
             }
         }

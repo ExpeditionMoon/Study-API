@@ -23,7 +23,7 @@ public class RecipeCustomService {
                 .build();
         recipeRepository.save(recipe);
         commonService.saveManuals(dto.getRecipeManualList(), recipe);
-        commonService.saveCustomParts(dto.getRecipePartsList(), recipe);
+        commonService.saveParts(dto.getRecipePartsList(), recipe);
 
         return RecipeCustomDto.customDto(
                 recipe,

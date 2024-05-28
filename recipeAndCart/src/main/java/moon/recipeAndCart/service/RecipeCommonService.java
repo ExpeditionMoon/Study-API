@@ -31,17 +31,7 @@ public class RecipeCommonService {
         });
     }
 
-    public void saveParts(List<String> parts, Recipe savedRecipe) {
-        parts.forEach(part -> {
-            RecipeParts recipePart = RecipeParts.builder()
-                    .partsName(String.valueOf(part))
-                    .recipe(savedRecipe)
-                    .build();
-            partsRepository.save(recipePart);
-        });
-    }
-
-    public void saveCustomParts(List<RecipePartsDto> parts, Recipe savedRecipe) {
+    public void saveParts(List<RecipePartsDto> parts, Recipe savedRecipe) {
         parts.forEach(part -> {
             RecipeParts recipePart = RecipeParts.builder()
                     .partsName(String.valueOf(part))
