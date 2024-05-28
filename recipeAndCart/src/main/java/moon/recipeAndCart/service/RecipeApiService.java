@@ -4,19 +4,12 @@ import lombok.RequiredArgsConstructor;
 import moon.recipeAndCart.config.WebClientConfig;
 import moon.recipeAndCart.dto.official.RecipeApiDto;
 import moon.recipeAndCart.dto.official.RecipeApiResponse;
-import moon.recipeAndCart.dto.common.RecipeManualDto;
 import moon.recipeAndCart.entity.Recipe;
-import moon.recipeAndCart.entity.RecipeManual;
-import moon.recipeAndCart.entity.RecipeParts;
-import moon.recipeAndCart.repository.RecipeManualRepository;
-import moon.recipeAndCart.repository.RecipePartsRepository;
 import moon.recipeAndCart.repository.RecipeRepository;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -24,23 +17,25 @@ public class RecipeApiService {
 
     private final WebClientConfig webClientConfig;
     private final RecipeRepository recipeRepository;
-    private final RecipeManualRepository manualRepository;
-    private final RecipePartsRepository partsRepository;
+    private final RecipeCommonService commonService;
 
     private static final int PAGE_SIZE = 100;
-    private int currentPage = 1;
+    private final Map<String, Integer> menuPageMap = new HashMap<>();
+    private final Map<String, Integer> typePageMap = new HashMap<>();
 
     public Mono<String> fetchAndSaveRecipesByMenu(String menu) {
+        int currentPage = menuPageMap.getOrDefault(menu, 1);
         return fetchMenu("RCP_NM", menu, currentPage, PAGE_SIZE)
                 .doOnNext(this::saveRecipesFromApiResponse)
-                .doOnNext(response -> currentPage++)
+                .doOnNext(response -> menuPageMap.put(menu, currentPage + 1))
                 .map(response -> "레시피를 성공적으로 저장했습니다.");
     }
 
     public Mono<String> fetchAndSaveRecipesByType(String type) {
+        int currentPage = typePageMap.getOrDefault(type, 1);
         return fetchMenu("RCP_PAT2", type, currentPage, PAGE_SIZE)
                 .doOnNext(this::saveRecipesFromApiResponse)
-                .doOnNext(response -> currentPage++)
+                .doOnNext(response -> typePageMap.put(type, currentPage + 1))
                 .map(response -> "레시피를 성공적으로 저장했습니다.");
     }
 
@@ -64,31 +59,9 @@ public class RecipeApiService {
                 .forEach(apiDto -> {
                     Recipe recipe = convertToRecipeEntity(apiDto);
                     recipeRepository.save(recipe);
-                    saveManuals(apiDto.getManual(), recipe);
-                    saveParts(apiDto.extractRecipeParts(), recipe);
+                    commonService.saveManuals(apiDto.getManual(), recipe);
+                    commonService.saveParts(apiDto.extractRecipeParts(), recipe);
                 });
-    }
-
-    private void saveManuals(List<RecipeManualDto> manuals, Recipe savedRecipe) {
-        manuals.forEach(manualDto -> {
-            RecipeManual manual = RecipeManual.builder()
-                    .step((long) manualDto.getStep())
-                    .manualTxt(manualDto.getManualTxt())
-                    .manualImgUrl(manualDto.getManualImgUrl())
-                    .recipe(savedRecipe)
-                    .build();
-            manualRepository.save(manual);
-        });
-    }
-
-    private void saveParts(List<String> parts, Recipe savedRecipe) {
-        parts.forEach(part -> {
-            RecipeParts recipePart = RecipeParts.builder()
-                    .partsName(part)
-                    .recipe(savedRecipe)
-                    .build();
-            partsRepository.save(recipePart);
-        });
     }
 
     private Recipe convertToRecipeEntity(RecipeApiDto apiDto) {
