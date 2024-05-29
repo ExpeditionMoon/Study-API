@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 public class RecipeCustomService {
 
     private final RecipeRepository recipeRepository;
-    private final RecipeCommonService commonService;
+    private final RecipeDataAccessService dataAccessService;
 
     @Transactional
     public RecipeResponseDto saveRecipe(RecipeResponseDto dto) {
@@ -22,8 +22,8 @@ public class RecipeCustomService {
                 .recipeNaTip(dto.getRecipeNaTip())
                 .build();
         recipeRepository.save(recipe);
-        commonService.saveManuals(dto.getRecipeManualList(), recipe);
-        commonService.saveParts(dto.getRecipePartsList(), recipe);
+        dataAccessService.saveManuals(dto.getRecipeManualList(), recipe);
+        dataAccessService.saveParts(dto.getRecipePartsList(), recipe);
 
         return RecipeResponseDto.toResponseDto(
                 recipe,

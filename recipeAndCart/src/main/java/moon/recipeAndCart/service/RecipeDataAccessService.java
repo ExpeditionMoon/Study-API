@@ -14,7 +14,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class RecipeCommonService {
+public class RecipeDataAccessService {
 
     private final RecipeManualRepository manualRepository;
     private final RecipePartsRepository partsRepository;

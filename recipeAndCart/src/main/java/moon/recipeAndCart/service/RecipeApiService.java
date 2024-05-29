@@ -19,7 +19,7 @@ public class RecipeApiService {
     private static final int PAGE_SIZE = 100;
     private final WebClientConfig webClientConfig;
     private final RecipeRepository recipeRepository;
-    private final RecipeCommonService commonService;
+    private final RecipeDataAccessService dataAccessService;
     private final Map<String, Integer> menuPageMap = new HashMap<>();
     private final Map<String, Integer> typePageMap = new HashMap<>();
 
@@ -61,8 +61,8 @@ public class RecipeApiService {
                 .forEach(apiDto -> {
                     Recipe recipe = convertToRecipeEntity(apiDto);
                     recipeRepository.save(recipe);
-                    commonService.saveManuals(apiDto.getManual(), recipe);
-                    commonService.saveParts(apiDto.extractRecipeParts(), recipe);
+                    dataAccessService.saveManuals(apiDto.getManual(), recipe);
+                    dataAccessService.saveParts(apiDto.extractRecipeParts(), recipe);
                     savedRecipes.add(recipe);
                 });
         return Mono.just(savedRecipes);
@@ -81,8 +81,8 @@ public class RecipeApiService {
         return recipes.stream()
                 .map(recipe -> RecipeResponseDto.toResponseDto(
                         recipe,
-                        commonService.findManualsByRecipe(recipe),
-                        commonService.findPartsByRecipe(recipe)
+                        dataAccessService.findManualsByRecipe(recipe),
+                        dataAccessService.findPartsByRecipe(recipe)
                 ))
                 .toList();
     }

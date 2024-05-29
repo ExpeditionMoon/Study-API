@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/recipe")
 @RequiredArgsConstructor
-public class RecioeCustomController {
+public class RecipeCustomController {
 
     private final RecipeCustomService customService;
 
