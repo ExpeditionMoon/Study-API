@@ -1,4 +1,4 @@
-package moon.kakaoMapAPI.exception;
+package moon.kakaoMapAPI.util.exception;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;

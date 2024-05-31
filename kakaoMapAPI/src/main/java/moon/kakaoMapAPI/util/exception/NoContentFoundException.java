@@ -1,4 +1,4 @@
-package moon.kakaoMapAPI.exception;
+package moon.kakaoMapAPI.util.exception;
 
 public class NoContentFoundException extends RuntimeException {
     public NoContentFoundException(String message) {
