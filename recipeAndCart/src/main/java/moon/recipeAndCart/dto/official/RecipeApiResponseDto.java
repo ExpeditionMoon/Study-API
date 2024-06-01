@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class RecipeApiResponse {
+public class RecipeApiResponseDto {
     @JsonProperty("COOKRCP01")
     private CookRcp01 cookrcp01;
 }

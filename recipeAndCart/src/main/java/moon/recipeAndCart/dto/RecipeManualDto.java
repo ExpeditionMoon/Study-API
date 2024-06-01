@@ -1,4 +1,4 @@
-package moon.recipeAndCart.dto.common;
+package moon.recipeAndCart.dto;
 
 import lombok.Builder;
 import lombok.Data;

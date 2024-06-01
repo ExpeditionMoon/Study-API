@@ -1,15 +1,17 @@
-package moon.recipeAndCart.dto.common;
+package moon.recipeAndCart.dto.official;
 
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import moon.recipeAndCart.dto.RecipeManualDto;
+import moon.recipeAndCart.dto.RecipePartsDto;
 import moon.recipeAndCart.entity.Recipe;
 
 import java.util.List;
 
 @Data
 @NoArgsConstructor
-public class RecipeResponseDto {
+public class RecipeApiEntityDto {
     private String recipeName;
     private String recipeType;
     private String recipeTip;
@@ -17,7 +19,7 @@ public class RecipeResponseDto {
     private List<RecipePartsDto> recipePartsList;
 
     @Builder
-    public RecipeResponseDto(String recipeName, String recipeType, String recipeTip, List<RecipeManualDto> recipeManualList, List<RecipePartsDto> recipePartsList) {
+    public RecipeApiEntityDto(String recipeName, String recipeType, String recipeTip, List<RecipeManualDto> recipeManualList, List<RecipePartsDto> recipePartsList) {
         this.recipeName = recipeName;
         this.recipeType = recipeType;
         this.recipeTip = recipeTip;
@@ -25,8 +27,8 @@ public class RecipeResponseDto {
         this.recipePartsList = recipePartsList;
     }
 
-    public static RecipeResponseDto toResponseDto(Recipe recipe, List<RecipeManualDto> manualList, List<RecipePartsDto> partsList) {
-        return RecipeResponseDto.builder()
+    public static RecipeApiEntityDto toEntityDto(Recipe recipe, List<RecipeManualDto> manualList, List<RecipePartsDto> partsList) {
+        return RecipeApiEntityDto.builder()
                 .recipeName(recipe.getRecipeName())
                 .recipeType(recipe.getRecipeType())
                 .recipeTip(recipe.getRecipeTip())

@@ -6,8 +6,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import moon.recipeAndCart.dto.common.RecipeManualDto;
-import moon.recipeAndCart.dto.common.RecipePartsDto;
+import moon.recipeAndCart.dto.RecipeManualDto;
+import moon.recipeAndCart.dto.RecipePartsDto;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RecipeApiDto {
+public class RecipeApiProcessingDto {
     @JsonProperty("RCP_SEQ")
     private Long recipeApiNo;
     @JsonProperty("RCP_NM")

@@ -10,5 +10,5 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CookRcp01 {
-    private List<RecipeApiDto> row;
+    private List<RecipeApiProcessingDto> row;
 }
