@@ -19,7 +19,7 @@ public class RecipeCustomService {
         Recipe recipe = Recipe.builder()
                 .recipeName(dto.getRecipeName())
                 .recipeType(dto.getRecipeType())
-                .recipeNaTip(dto.getRecipeNaTip())
+                .recipeTip(dto.getRecipeTip())
                 .build();
         recipeRepository.save(recipe);
         dataAccessService.saveManuals(dto.getRecipeManualList(), recipe);

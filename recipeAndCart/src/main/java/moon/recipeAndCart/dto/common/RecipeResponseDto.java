@@ -12,15 +12,15 @@ import java.util.List;
 public class RecipeResponseDto {
     private String recipeName;
     private String recipeType;
-    private String recipeNaTip;
+    private String recipeTip;
     private List<RecipeManualDto> recipeManualList;
     private List<RecipePartsDto> recipePartsList;
 
     @Builder
-    public RecipeResponseDto(String recipeName, String recipeType, String recipeNaTip, List<RecipeManualDto> recipeManualList, List<RecipePartsDto> recipePartsList) {
+    public RecipeResponseDto(String recipeName, String recipeType, String recipeTip, List<RecipeManualDto> recipeManualList, List<RecipePartsDto> recipePartsList) {
         this.recipeName = recipeName;
         this.recipeType = recipeType;
-        this.recipeNaTip = recipeNaTip;
+        this.recipeTip = recipeTip;
         this.recipeManualList = recipeManualList;
         this.recipePartsList = recipePartsList;
     }
@@ -29,7 +29,7 @@ public class RecipeResponseDto {
         return RecipeResponseDto.builder()
                 .recipeName(recipe.getRecipeName())
                 .recipeType(recipe.getRecipeType())
-                .recipeNaTip(recipe.getRecipeNaTip())
+                .recipeTip(recipe.getRecipeTip())
                 .recipeManualList(manualList)
                 .recipePartsList(partsList)
                 .build();

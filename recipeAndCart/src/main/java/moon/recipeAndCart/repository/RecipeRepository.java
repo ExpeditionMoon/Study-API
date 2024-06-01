@@ -9,6 +9,6 @@ import java.util.List;
 public interface RecipeRepository extends JpaRepository<Recipe, Long> {
     @Query("""
            SELECT r.recipeApiNo FROM Recipe r
-            """)
+           """)
     List<Long> findAllRecipeApiNos();
 }

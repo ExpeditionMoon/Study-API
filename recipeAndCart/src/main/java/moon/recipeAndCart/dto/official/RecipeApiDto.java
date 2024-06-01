@@ -32,7 +32,7 @@ public class RecipeApiDto {
     private List<RecipeManualDto> manual = new ArrayList<>();
 
     @JsonProperty("RCP_NA_TIP")
-    private String recipeNaTip;
+    private String recipeTip;
 
     @JsonAnySetter
     public void parseManuals(String key, Object value) {

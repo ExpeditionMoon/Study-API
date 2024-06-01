@@ -25,7 +25,7 @@ public class Recipe {
     private String recipeType;
 
     @Column(nullable = true)
-    private String recipeNaTip;
+    private String recipeTip;
 
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<RecipeManual> recipeManual;
@@ -34,11 +34,11 @@ public class Recipe {
     private List<RecipeParts> recipeParts;
 
     @Builder
-    public Recipe(Long recipeApiNo, String recipeName, String recipeType, String recipeNaTip, List<RecipeManual> recipeManual, List<RecipeParts> recipeParts) {
+    public Recipe(Long recipeApiNo, String recipeName, String recipeType, String recipeTip, List<RecipeManual> recipeManual, List<RecipeParts> recipeParts) {
         this.recipeApiNo = recipeApiNo;
         this.recipeName = recipeName;
         this.recipeType = recipeType;
-        this.recipeNaTip = recipeNaTip;
+        this.recipeTip = recipeTip;
         this.recipeManual = recipeManual;
         this.recipeParts = recipeParts;
     }
