@@ -18,11 +18,17 @@ public class RecipeApiController {
 
     private final RecipeApiService recipeService;
 
+    /**
+     * 메뉴 이름으로 가져온 레시피를 저장
+     */
     @GetMapping("/menu")
     public Mono<List<RecipeApiEntityDto>> fetchAndSaveRecipes(@RequestParam("menu") String menu) {
         return recipeService.fetchAndSaveRecipesByMenu(menu);
     }
 
+    /**
+     * 메뉴 종류로 가져온 레시피를 저장
+     */
     @GetMapping("/type")
     public Mono<List<RecipeApiEntityDto>> fetchAndSaveRecipesByType(@RequestParam("type") String type) {
         return recipeService.fetchAndSaveRecipesByType(type);

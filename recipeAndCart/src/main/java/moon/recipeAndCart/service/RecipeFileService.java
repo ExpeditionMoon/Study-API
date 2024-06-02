@@ -20,6 +20,15 @@ public class RecipeFileService {
     @Value("${file.dir}")
     private String fileDir;
 
+    /**
+     * recipeId 와 step, 파일 이름으로 새로운 파일 저장
+     *
+     * @param recipeId 레시피 ID
+     * @param step     메뉴얼 단계 번호
+     * @param file     저장할 파일
+     * @return 저장된 파일의 이름 반환
+     * @throws IOException 이미지 파일 저장 중 예외 발생
+     */
     public String saveFile(Long recipeId, Long step, MultipartFile file) throws IOException {
         Path fileStoragePath = Paths.get(fileDir).toAbsolutePath().normalize();
         Files.createDirectories(fileStoragePath);
