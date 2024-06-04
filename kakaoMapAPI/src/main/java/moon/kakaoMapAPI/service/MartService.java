@@ -45,7 +45,7 @@ public class MartService {
      * @param address 조회할 주소
      * @return 주소에 해당하는 위도와 경도를 MartLocationDto에 담음
      */
-    public Mono<MartLocationDto> findLocation(String address) {
+    private Mono<MartLocationDto> findLocation(String address) {
         return webClientConfig.kakaoWebClient().get()
                 .uri(uriBuilder -> uriBuilder.path("/v2/local/search/address.json")
                         .queryParam("query", address)
@@ -63,7 +63,7 @@ public class MartService {
      * @param radius 검색 반경(미터 단위)
      * @return 검색된 마트 정보를 MartDataDto 리스트로 변환
      */
-    public Flux<MartDataDto> searchMarts(double latitude, double longitude, int radius) {
+    private Flux<MartDataDto> searchMarts(double latitude, double longitude, int radius) {
         return webClientConfig.kakaoWebClient().get()
                 .uri(uriBuilder -> uriBuilder.path("/v2/local/search/category.json")
                         .queryParam("category_group_code", "MT1")
@@ -83,8 +83,9 @@ public class MartService {
      * @param contentDto 저장할 마트 정보
      * @return MartResponseDto로 저장된 마트 정보 반환
      */
-    public Mono<MartResponseDto> saveMart(MartDataDto contentDto) {
-        return Mono.fromCallable(() -> martRepository.findJoinMartByNameContaining(contentDto.getPlaceName()))
+    private Mono<MartResponseDto> saveMart(MartDataDto contentDto) {
+        return Mono.fromCallable(() -> martRepository
+                        .findJoinMartByNameContaining(contentDto.getPlaceName()))
                 .subscribeOn(Schedulers.boundedElastic())
                 .map(joinMart -> {
                     Mart mart = Mart.builder()
@@ -94,7 +95,10 @@ public class MartService {
                             .build();
                     return martRepository.save(mart);
                 })
-                .map(savedMart -> new MartResponseDto((savedMart.getMartName()), savedMart.getMartAddress()));
+                .map(savedMart -> new MartResponseDto(
+                        savedMart.getMartName(),
+                        savedMart.getMartAddress())
+                );
     }
 
     /**

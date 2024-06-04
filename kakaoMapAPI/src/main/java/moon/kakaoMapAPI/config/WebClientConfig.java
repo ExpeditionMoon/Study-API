@@ -16,13 +16,16 @@ public class WebClientConfig {
     @Value("${kakao.api.key}")
     private String kakaoRestApiKey;
 
+    @Value("${kakao.base-url}")
+    private String kakaoBaseUrl;
+
     @Value("${open.api.base-url}")
     private String baseUrl;
 
     @Bean
     public WebClient kakaoWebClient() {
         return WebClient.builder()
-                .baseUrl("https://dapi.kakao.com")
+                .baseUrl(kakaoBaseUrl)
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .defaultHeader("Authorization", "KakaoAK " + kakaoRestApiKey)
                 .build();
