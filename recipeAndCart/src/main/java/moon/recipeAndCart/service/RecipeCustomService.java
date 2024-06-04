@@ -1,16 +1,15 @@
 package moon.recipeAndCart.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import moon.recipeAndCart.dto.RecipeManualDto;
-import moon.recipeAndCart.dto.RecipePartsDto;
-import moon.recipeAndCart.dto.RecipeRequestDto;
-import moon.recipeAndCart.dto.RecipeResponseDto;
+import moon.recipeAndCart.dto.*;
 import moon.recipeAndCart.entity.Recipe;
 import moon.recipeAndCart.entity.RecipeManual;
 import moon.recipeAndCart.entity.RecipeParts;
 import moon.recipeAndCart.repository.RecipeManualRepository;
 import moon.recipeAndCart.repository.RecipePartsRepository;
 import moon.recipeAndCart.repository.RecipeRepository;
+import moon.recipeAndCart.util.enums.RecipeMessage;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -34,17 +33,20 @@ public class RecipeCustomService {
      * @param requestDto 저장할 정보가 담긴 DTO
      * @param files      첨부할 이미지 파일 목록
      * @return 저장된 레시피 정보 반환
+     * @throws RuntimeException        이미지 파일 처리 중 오류 발생
+     * @throws EntityNotFoundException 레시피를 찾을 수 없을 때 발생
      */
     @Transactional
-    public RecipeResponseDto createRecipe(RecipeRequestDto requestDto, List<MultipartFile> files) {
+    public ApiResponse<RecipeResponseDto> createRecipe(RecipeRequestDto requestDto, List<MultipartFile> files) {
         Recipe recipe = saveRecipe(requestDto);
         List<RecipeManualDto> updatedManuals = createManuals(recipe, requestDto.getRecipeManualList(), files);
         saveParts(requestDto.getRecipePartsList(), recipe);
 
-        return RecipeResponseDto.toResponseDto(
-                recipe,
-                updatedManuals,
-                requestDto.getRecipePartsList());
+        return ApiResponse.success(
+                RecipeResponseDto.toResponseDto(
+                        recipe, updatedManuals, requestDto.getRecipePartsList()),
+                RecipeMessage.LOADED_RECIPE.getMessage()
+        );
     }
 
     /**
@@ -72,7 +74,8 @@ public class RecipeCustomService {
                     RecipeManualDto savedManualDto = saveManual(recipe.getRecipeId(), manualDto, file);
                     updatedManuals.add(savedManualDto);
                 } catch (IOException e) {
-                    throw new RuntimeException("이미지 파일 처리 중 오류가 발생했습니다.", e);
+                    throw new RuntimeException(
+                            RecipeMessage.ERROR_RECIPE_IMG_PROCESSING.getMessage(), e);
                 }
             }
         }
@@ -84,7 +87,7 @@ public class RecipeCustomService {
      */
     private RecipeManualDto saveManual(Long recipeId, RecipeManualDto manualDto, MultipartFile file) throws IOException {
         Recipe recipe = recipeRepository.findById(recipeId)
-                .orElseThrow(() -> new IllegalArgumentException("레시피를 찾을 수 없습니다." + recipeId));
+                .orElseThrow(() -> new EntityNotFoundException(RecipeMessage.NOT_FOUND_RECIPE.getMessage()));
 
         Long step = getNextStepNumber(recipeId);
         String fileUrl = fileService.saveFile(recipeId, step, file);
