@@ -1,12 +1,15 @@
 spring:
   application:
     name: recipeAndCart
+  output:
+    ansi:
+      enabled: always
   profiles:
     active:
       - api
 
   datasource:
-    url: jdbc:mysql://localhost:3306/testdb
+    url: jdbc:mysql://localhost:3306/recipe
     username: root
     password: 1234
   jpa:
@@ -15,6 +18,7 @@ spring:
         show_sql: true
     hibernate:
       ddl-auto: create
+    open-in-view: false
 recipe:
   base-url: https://openapi.foodsafetykorea.go.kr/api/
-  req-type: /COOKRCP01/json/1/1000
+  req-type: /COOKRCP01/json/
