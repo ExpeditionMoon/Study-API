@@ -1,7 +1,15 @@
 package moon.kakaoMapAPI.service;
 
 import jakarta.persistence.EntityNotFoundException;
-import moon.kakaoMapAPI.repository.UserRepository;
+import moon.kakaoMapAPI.dto.ApiResponse;
+import moon.kakaoMapAPI.dto.CartProductDto;
+import moon.kakaoMapAPI.dto.DiscountInfoDto;
+import moon.kakaoMapAPI.dto.ProductAndDiscountDataDto;
+import moon.kakaoMapAPI.entity.JoinMart;
+import moon.kakaoMapAPI.entity.Mart;
+import moon.kakaoMapAPI.entity.Product;
+import moon.kakaoMapAPI.entity.User;
+import moon.kakaoMapAPI.repository.*;
 import moon.kakaoMapAPI.util.enums.MartAndProductMessage;
 import moon.kakaoMapAPI.util.exception.NoContentFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,19 +20,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import moon.kakaoMapAPI.dto.ApiResponse;
-import moon.kakaoMapAPI.dto.CartProductDto;
-import moon.kakaoMapAPI.dto.DiscountInfoDto;
-import moon.kakaoMapAPI.dto.ProductAndDiscountDataDto;
-import moon.kakaoMapAPI.entity.Mart;
-import moon.kakaoMapAPI.entity.User;
-import moon.kakaoMapAPI.entity.JoinMart;
-import moon.kakaoMapAPI.entity.Product;
-import moon.kakaoMapAPI.repository.CartRepository;
-import moon.kakaoMapAPI.repository.MartRepository;
-import moon.kakaoMapAPI.repository.JoinMartRepository;
-import moon.kakaoMapAPI.repository.MartProductRepository;
-import moon.kakaoMapAPI.repository.ProductRepository;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -38,6 +33,13 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class MartProductServiceTest {
+    private final Long memberId = 1L;
+    private final Long martAId = 1L;
+    private final Long martBId = 2L;
+    private final Long joinAId = 1L;
+    private final Long joinBId = 3L;
+    private final Long productAId = 1L;
+    private final Long productBId = 2L;
     @Mock
     private MartProductRepository martProductRepository;
     @Mock
@@ -52,21 +54,14 @@ class MartProductServiceTest {
     private UserRepository userRepository;
     @InjectMocks
     private MartProductService martProductService;
-
     private User user;
     private ProductAndDiscountDataDto mockloadData;
     private Map<Long, Long> expectedTotalFinalPrice;
-    private final Long userId = 1L;
-    private final Long martAId = 1L;
-    private final Long martBId = 2L;
-    private final Long joinAId = 1L;
-    private final Long joinBId = 3L;
-    private final Long productAId = 1L;
-    private final Long productBId = 2L;
+
     @BeforeEach
     void 초기_설정() {
         user = Mockito.mock(User.class);
-        when(user.getUserId()).thenReturn(userId);
+        when(user.getUserId()).thenReturn(memberId);
 
         JoinMart joinA = JoinMart.builder().joinId(joinAId).build();
         JoinMart joinB = JoinMart.builder().joinId(joinBId).build();
@@ -99,7 +94,7 @@ class MartProductServiceTest {
 
     @Test
     void 마트별_합계금액_출력테스트() {
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findById(memberId)).thenReturn(Optional.of(user));
         when(cartRepository.findCartsByUser(user)).thenReturn(mockloadData.getCartProductList());
         when(productRepository.findById(productAId)).thenReturn(Optional.of(mockloadData.getProductList().get(0)));
         when(productRepository.findById(productBId)).thenReturn(Optional.of(mockloadData.getProductList().get(1)));
@@ -114,7 +109,7 @@ class MartProductServiceTest {
 
     @Test
     void 마트별_세부사항_출력테스트() {
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findById(memberId)).thenReturn(Optional.of(user));
         when(cartRepository.findCartsByUser(user)).thenReturn(mockloadData.getCartProductList());
         when(productRepository.findById(productAId)).thenReturn(Optional.of(mockloadData.getProductList().get(0)));
         when(productRepository.findById(productBId)).thenReturn(Optional.of(mockloadData.getProductList().get(1)));
@@ -132,17 +127,17 @@ class MartProductServiceTest {
     @Test
     @DisplayName("사용자 정보를 찾을 수 없는 경우")
     void 회원_정보_예외테스트() {
-      when(userRepository.findById(userId)).thenReturn(Optional.empty());
+        when(userRepository.findById(memberId)).thenReturn(Optional.empty());
 
-      EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
-              () -> martProductService.findMartInfoByMartId(martAId));
-      assertThat(exception.getMessage()).isEqualTo(MartAndProductMessage.NOT_FOUND_USER.getMessage());
+        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+                () -> martProductService.findMartInfoByMartId(martAId));
+        assertThat(exception.getMessage()).isEqualTo(MartAndProductMessage.NOT_FOUND_USER.getMessage());
     }
 
     @Test
     @DisplayName("장바구니가 비어있는 경우")
     void 장바구니_정보_예외테스트() {
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findById(memberId)).thenReturn(Optional.of(user));
         when(cartRepository.findCartsByUser(user)).thenReturn(List.of());
 
         NoContentFoundException e = assertThrows(NoContentFoundException.class,
@@ -153,7 +148,7 @@ class MartProductServiceTest {
     @Test
     @DisplayName("장바구니 상품목록이 비어있는 경우")
     void 장바구니_상품정보_예외테스트() {
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findById(memberId)).thenReturn(Optional.of(user));
         when(cartRepository.findCartsByUser(user)).thenReturn(mockloadData.getCartProductList());
         when(productRepository.findById(productAId)).thenReturn(Optional.empty());
         when(productRepository.findById(productBId)).thenReturn(Optional.empty());
@@ -166,7 +161,7 @@ class MartProductServiceTest {
     @Test
     @DisplayName("마트 상세정보를 찾을 수 없는 경우")
     void 마트_상세정보_예외테스트() {
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepository.findById(memberId)).thenReturn(Optional.of(user));
         when(cartRepository.findCartsByUser(user)).thenReturn(mockloadData.getCartProductList());
         when(productRepository.findById(productAId)).thenReturn(Optional.of(mockloadData.getProductList().get(0)));
         when(productRepository.findById(productBId)).thenReturn(Optional.of(mockloadData.getProductList().get(1)));

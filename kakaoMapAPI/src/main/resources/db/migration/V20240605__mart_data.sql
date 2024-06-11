@@ -1,4 +1,66 @@
-INSERT INTO `mart_info` (`product_name`, `sale_price`, `store`, `manufacturer`)
+CREATE TABLE IF NOT EXISTS mart_info (
+    data_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    product_name VARCHAR(255) NOT NULL,
+    sale_price BIGINT NOT NULL,
+    store VARCHAR(255) NOT NULL,
+    manufacturer VARCHAR(255)
+);
+
+CREATE TABLE IF NOT EXISTS product (
+    product_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    product_name VARCHAR(255) NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS join_mart (
+    join_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    store VARCHAR(255) NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS mart (
+    mart_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    mart_name VARCHAR(255) NOT NULL UNIQUE,
+    mart_address VARCHAR(255) NOT NULL,
+    entp_id VARCHAR(255),
+    entp_area_code VARCHAR(255),
+    entp_tel_no VARCHAR(255),
+    join_id BIGINT,
+    FOREIGN KEY (join_id) REFERENCES join_mart(join_id)
+);
+
+CREATE TABLE IF NOT EXISTS discount (
+    discount_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    discount_rate DECIMAL(3, 1) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS mart_product (
+    mart_product_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    stock BIGINT,
+    price BIGINT NOT NULL,
+    manufacturer VARCHAR(255),
+    join_id BIGINT NOT NULL,
+    product_id BIGINT NOT NULL,
+    discount_id BIGINT,
+    FOREIGN KEY (join_id) REFERENCES join_mart(join_id),
+    FOREIGN KEY (product_id) REFERENCES product(product_id),
+    FOREIGN KEY (discount_id) REFERENCES discount(discount_id)
+);
+
+CREATE TABLE IF NOT EXISTS user (
+    user_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_name VARCHAR(255) NOT NULL,
+    address VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS cart (
+    cart_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    quantity BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    product_id BIGINT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES user(user_id),
+    FOREIGN KEY (product_id) REFERENCES product(product_id)
+);
+
+INSERT INTO mart_info (product_name, sale_price, store, manufacturer)
 VALUES ('옛날 자른당면(300g)', 4780, '농협', '오뚜기'),
        ('신라면(5개입)', 3900, '농협', '농심'),
        ('진라면 매운맛(5개입)', 2980, '농협', '오뚜기'),
@@ -1226,59 +1288,45 @@ VALUES ('옛날 자른당면(300g)', 4780, '농협', '오뚜기'),
 /* product 생성 */
 INSERT INTO product (product_name)
 SELECT DISTINCT product_name
-FROM mart_info;
+FROM mart_info
+ON DUPLICATE KEY UPDATE product_name = VALUES(product_name);
 
 /* join_mart 생성 */
 INSERT INTO join_mart (store)
 SELECT DISTINCT store
-FROM mart_info;
+FROM mart_info
+ON DUPLICATE KEY UPDATE store = VALUES(store);
 
 /* mart_product 생성 */
 INSERT INTO mart_product (price, manufacturer, join_id, product_id)
 SELECT mi.sale_price, mi.manufacturer, jm.join_id, p.product_id
 FROM mart_info mi
-         JOIN product p ON mi.product_name = p.product_name
-         JOIN join_mart jm ON mi.store = jm.store
-WHERE mi.store LIKE '농협';
+JOIN product p ON mi.product_name = p.product_name
+JOIN join_mart jm ON mi.store = jm.store;
 
-INSERT INTO mart_product (price, manufacturer, join_id, product_id)
-SELECT mi.sale_price, mi.manufacturer, jm.join_id, p.product_id
-FROM mart_info mi
-         JOIN product p ON mi.product_name = p.product_name
-         JOIN join_mart jm ON mi.store = jm.store
-WHERE mi.store LIKE '롯데';
+/* discount 생성 */
+INSERT INTO discount (discount_rate)
+VALUES  (10.5),
+        (15.0),
+        (5.0),
+        (20.5);
 
-INSERT INTO mart_product (price, manufacturer, join_id, product_id)
-SELECT mi.sale_price, mi.manufacturer, jm.join_id, p.product_id
-FROM mart_info mi
-         JOIN product p ON mi.product_name = p.product_name
-         JOIN join_mart jm ON mi.store = jm.store
-WHERE mi.store LIKE '신세계백화점';
-
-INSERT INTO mart_product (price, manufacturer, join_id, product_id)
-SELECT mi.sale_price, mi.manufacturer, jm.join_id, p.product_id
-FROM mart_info mi
-         JOIN product p ON mi.product_name = p.product_name
-         JOIN join_mart jm ON mi.store = jm.store
-WHERE mi.store LIKE '이마트';
-
-INSERT INTO mart_product (price, manufacturer, join_id, product_id)
-SELECT mi.sale_price, mi.manufacturer, jm.join_id, p.product_id
-FROM mart_info mi
-         JOIN product p ON mi.product_name = p.product_name
-         JOIN join_mart jm ON mi.store = jm.store
-WHERE mi.store LIKE '현대백화점';
-
-INSERT INTO mart_product (price, manufacturer, join_id, product_id)
-SELECT mi.sale_price, mi.manufacturer, jm.join_id, p.product_id
-FROM mart_info mi
-         JOIN product p ON mi.product_name = p.product_name
-         JOIN join_mart jm ON mi.store = jm.store
-WHERE mi.store LIKE 'GS%';
+/* 마트별 상품 할인율 */
+UPDATE mart_product
+SET discount_id = CASE
+    WHEN mart_product_id = 1 THEN 1
+    WHEN mart_product_id = 128 THEN 2
+    WHEN mart_product_id = 383 THEN 3
+    WHEN mart_product_id = 1149 THEN 4
+    ELSE discount_id
+END;
 
 /* user 생성 */
-INSERT INTO user(user_name, address)
-VALUES ('회원A', '회원 주소');
+INSERT INTO user (user_name, address)
+VALUES ('회원A', '전북 삼성동 100');
+
+INSERT INTO user (user_name, address)
+VALUES ('회원B', '서울 종로구 종로 80-2');
 
 /* cart 생성 */
 INSERT INTO cart (quantity, user_id, product_id)

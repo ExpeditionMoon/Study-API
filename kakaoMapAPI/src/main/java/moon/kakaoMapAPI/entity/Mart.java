@@ -17,7 +17,7 @@ public class Mart {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long martId;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String martName; // 업체_명
 
     @Column(nullable = false)

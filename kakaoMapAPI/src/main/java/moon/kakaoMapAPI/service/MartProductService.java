@@ -2,19 +2,19 @@ package moon.kakaoMapAPI.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import moon.kakaoMapAPI.entity.JoinMart;
-import moon.kakaoMapAPI.entity.User;
-import moon.kakaoMapAPI.util.enums.MartAndProductMessage;
-import moon.kakaoMapAPI.util.exception.NoContentFoundException;
-import moon.kakaoMapAPI.repository.*;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import moon.kakaoMapAPI.dto.ApiResponse;
 import moon.kakaoMapAPI.dto.CartProductDto;
 import moon.kakaoMapAPI.dto.DiscountInfoDto;
 import moon.kakaoMapAPI.dto.ProductAndDiscountDataDto;
+import moon.kakaoMapAPI.entity.JoinMart;
 import moon.kakaoMapAPI.entity.Mart;
 import moon.kakaoMapAPI.entity.Product;
+import moon.kakaoMapAPI.entity.User;
+import moon.kakaoMapAPI.repository.*;
+import moon.kakaoMapAPI.util.enums.MartAndProductMessage;
+import moon.kakaoMapAPI.util.exception.NoContentFoundException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
@@ -29,7 +29,7 @@ public class MartProductService {
     private final MartProductRepository martProductRepository;
     private final CartRepository cartRepository;
     private final ProductRepository productRepository;
-    private final UserRepository userRepository;
+    private final UserRepository memberRepository;
     private final JoinMartRepository joinMartRepository;
     private final MartRepository martRepository;
 
@@ -49,6 +49,7 @@ public class MartProductService {
                         loadData.getCartProductList()),
                 MartAndProductMessage.LOADED_TOTAL_SUM.getMessage());
     }
+
     /**
      * 마트별 상품 가격 세부사항 조회
      *
@@ -74,10 +75,10 @@ public class MartProductService {
      * 사용자를 확인
      */
     private ProductAndDiscountDataDto getProductAndDiscountData() {
-        Long userId = 1L;
+        Long memberId = 1L;
 
         // 회원 정보 확인
-        User user = userRepository.findById(userId)
+        User user = memberRepository.findById(memberId)
                 .orElseThrow(() -> new EntityNotFoundException(MartAndProductMessage.NOT_FOUND_USER.getMessage()));
 
 

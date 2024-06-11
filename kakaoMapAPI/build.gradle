@@ -38,6 +38,9 @@ dependencies {
 	// thymeleaf
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
+	// flyway
+	implementation 'org.flywaydb:flyway-mysql'
+
 	// macOS
 	runtimeOnly 'io.netty:netty-resolver-dns-native-macos:4.1.109.Final:osx-aarch_64'
 }

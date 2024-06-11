@@ -23,7 +23,7 @@ public class MartProduct {
     @Column(nullable = false)
     private Long price;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String manufacturer;
 
     @ManyToOne(fetch = FetchType.LAZY)

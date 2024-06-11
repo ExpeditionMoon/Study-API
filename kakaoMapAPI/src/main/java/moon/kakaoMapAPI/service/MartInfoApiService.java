@@ -76,6 +76,7 @@ public class MartInfoApiService {
         Mart savedMart = martRepository.save(mart);
 
         return new MartResponseDto(
+                savedMart.getMartId(),
                 savedMart.getMartName(),
                 savedMart.getMartAddress(),
                 savedMart.getEntpId(),

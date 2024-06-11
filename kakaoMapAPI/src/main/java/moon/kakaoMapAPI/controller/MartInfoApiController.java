@@ -14,20 +14,27 @@ public class MartInfoApiController {
 
     private final MartInfoApiService martInfoApiService;
 
-    /** 마트 정보 가져오기 */
+    /**
+     * 마트 정보 가져오기
+     */
     @GetMapping("/store")
     public Mono<String> getStoreInfo() {
         return martInfoApiService.fetchInfo();
     }
 
-    /** 상품 정보 가져오기 */
+    /**
+     * 상품 정보 가져오기
+     */
     @GetMapping("/product")
     public Mono<String> getProductInfo() {
         return martInfoApiService.fetchProduct();
     }
 
     // TODO. 가져온 API 정보 저장하는 로직 완성하기
-    /** 가져온 정보 저장 */
+
+    /**
+     * 가져온 정보 저장
+     */
     @GetMapping("/api")
     public Flux<MartResponseDto> getEntpInfo() {
         return martInfoApiService.getAndSaveMartInfo();

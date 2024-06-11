@@ -3,9 +3,10 @@ package moon.kakaoMapAPI.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
 import moon.kakaoMapAPI.config.WebClientConfig;
-import moon.kakaoMapAPI.dto.MartResponseDto;
 import moon.kakaoMapAPI.dto.MartDataDto;
 import moon.kakaoMapAPI.dto.MartLocationDto;
+import moon.kakaoMapAPI.dto.MartResponseDto;
+import moon.kakaoMapAPI.entity.JoinMart;
 import moon.kakaoMapAPI.entity.Mart;
 import moon.kakaoMapAPI.repository.MartRepository;
 import org.springframework.stereotype.Service;
@@ -27,7 +28,7 @@ public class MartService {
      * 주소 주변 마트를 찾고 저장
      *
      * @param address 검색할 주소
-     * @param radius 검색 반경(미터 단위)
+     * @param radius  검색 반경(미터 단위)
      * @return MartResponseDto에 저장된 마트 정보들을 담음
      */
     public Flux<MartResponseDto> findAndSaveMarts(String address, int radius) {
@@ -58,9 +59,9 @@ public class MartService {
     /**
      * 주변의 마트 검색
      *
-     * @param latitude 검색 중심 위도
+     * @param latitude  검색 중심 위도
      * @param longitude 검색 중심 경도
-     * @param radius 검색 반경(미터 단위)
+     * @param radius    검색 반경(미터 단위)
      * @return 검색된 마트 정보를 MartDataDto 리스트로 변환
      */
     private Flux<MartDataDto> searchMarts(double latitude, double longitude, int radius) {
@@ -84,21 +85,33 @@ public class MartService {
      * @return MartResponseDto로 저장된 마트 정보 반환
      */
     private Mono<MartResponseDto> saveMart(MartDataDto contentDto) {
-        return Mono.fromCallable(() -> martRepository
-                        .findJoinMartByNameContaining(contentDto.getPlaceName()))
-                .subscribeOn(Schedulers.boundedElastic())
-                .map(joinMart -> {
-                    Mart mart = Mart.builder()
+        return Mono.defer(() -> {
+            Mart existMart = martRepository.findByMartName(contentDto.getPlaceName()).orElse(null);
+            if (existMart != null) {
+                return Mono.just(new MartResponseDto(
+                        existMart.getMartId(),
+                        existMart.getMartName(),
+                        existMart.getMartAddress()
+                ));
+            } else {
+                return Mono.defer(() -> {
+                    JoinMart joinMartOptional =
+                            martRepository.findJoinMartByNameContaining(contentDto.getPlaceName())
+                                    .orElse(null);
+                    Mart newMart = Mart.builder()
                             .martName(contentDto.getPlaceName())
                             .martAddress(contentDto.getRoadAddress())
-                            .joinMart(joinMart.orElse(null))
+                            .joinMart(joinMartOptional)
                             .build();
-                    return martRepository.save(mart);
-                })
-                .map(savedMart -> new MartResponseDto(
-                        savedMart.getMartName(),
-                        savedMart.getMartAddress())
-                );
+                    Mart savedMart = martRepository.save(newMart);
+                    return Mono.just(new MartResponseDto(
+                            savedMart.getMartId(),
+                            savedMart.getMartName(),
+                            savedMart.getMartAddress()
+                    ));
+                });
+            }
+        }).subscribeOn(Schedulers.boundedElastic());
     }
 
     /**

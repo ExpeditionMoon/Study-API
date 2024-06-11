@@ -21,7 +21,7 @@ public class MartInfo {
     private String productName;
 
     @Column(nullable = false)
-    private String salePrice;
+    private Long salePrice;
 
     @Column(nullable = false)
     private String store;

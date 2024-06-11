@@ -10,7 +10,7 @@ import java.io.Serializable;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonPropertyOrder({"success", "message","data"})
+@JsonPropertyOrder({"success", "message", "data"})
 public class ApiResponse<T> implements Serializable {
 
     private boolean success;

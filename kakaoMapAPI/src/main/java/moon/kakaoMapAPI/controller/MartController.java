@@ -18,10 +18,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MartController {
 
+    private final MartService martService;
+
     @Value("${kakao.js.key}")
     private String jsKey;
-
-    private final MartService martService;
 
     @GetMapping
     public String home(Model model) {
