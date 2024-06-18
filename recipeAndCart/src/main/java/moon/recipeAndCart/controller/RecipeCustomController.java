@@ -8,10 +8,7 @@ import moon.recipeAndCart.dto.RecipeRequestDto;
 import moon.recipeAndCart.dto.RecipeResponseDto;
 import moon.recipeAndCart.service.RecipeCustomService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -34,5 +31,15 @@ public class RecipeCustomController {
         RecipeRequestDto requestDto = new ObjectMapper().readValue(recipeData, RecipeRequestDto.class);
         ApiResponse<RecipeResponseDto> response = customService.createRecipe(requestDto, files);
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 해당 레시피의 작성자가 레시피 삭제
+     */
+    @DeleteMapping("/delete")
+    public ResponseEntity<ApiResponse> deleteRecipe(
+            @RequestParam Long recipeId
+    ) {
+        return ResponseEntity.ok(customService.deleteRecipe(recipeId));
     }
 }

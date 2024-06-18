@@ -39,8 +39,8 @@ public class RecipeCustomService {
     @Transactional
     public ApiResponse<RecipeResponseDto> createRecipe(RecipeRequestDto requestDto, List<MultipartFile> files) {
         Recipe recipe = saveRecipe(requestDto);
-        List<RecipeManualDto> updatedManuals = createManuals(recipe, requestDto.getRecipeManualList(), files);
-        saveParts(requestDto.getRecipePartsList(), recipe);
+        List<RecipeManualDto> updatedManuals = saveAllManuals(recipe, requestDto.getRecipeManualList(), files);
+        saveAllParts(requestDto.getRecipePartsList(), recipe);
 
         return ApiResponse.success(
                 RecipeResponseDto.toResponseDto(
@@ -50,7 +50,46 @@ public class RecipeCustomService {
     }
 
     /**
-     * 레시피 엔티티를 생성하고 저장
+     * 레시피 삭제
+     *
+     * @param recipeId 해당 레시피 고유번호
+     * @return 성공했다는 메시지 반환
+     * @throws RuntimeException 이미지 파일 처리 중 오류 발생
+     */
+    public ApiResponse deleteRecipe(Long recipeId) {
+        Recipe findRecipe = getRecipe(recipeId);
+        List<RecipeManual> findManuals = getManuals(recipeId);
+        findManuals.forEach(manual -> {
+            String fileName = manual.getManualImgUrl();
+            try {
+                fileService.deleteFile(fileName);
+            } catch (IOException e) {
+                throw new RuntimeException(RecipeMessage.ERROR_RECIPE_IMG_PROCESSING.getMessage(), e);
+            }
+        });
+
+        recipeRepository.delete(findRecipe);
+        return ApiResponse.success(null, RecipeMessage.SUCCESS_DELETE.getMessage());
+    }
+
+    /**
+     * 해당 레시피 찾아서 반환
+     */
+    private Recipe getRecipe(Long recipeId) {
+        return recipeRepository.findById(recipeId)
+                .orElseThrow(() -> new EntityNotFoundException(RecipeMessage.NOT_FOUND_RECIPE.getMessage()));
+    }
+
+    /**
+     * 해당 레시피의 메뉴얼을 가져옴
+     */
+    private List<RecipeManual> getManuals(Long recipeId) {
+        return manualRepository.findAllByRecipeRecipeId(recipeId)
+                .orElse(null);
+    }
+
+    /**
+     * 레시피를 저장
      */
     private Recipe saveRecipe(RecipeRequestDto requestDto) {
         Recipe recipe = Recipe.builder()
@@ -62,16 +101,16 @@ public class RecipeCustomService {
     }
 
     /**
-     * 레시피 메뉴얼과 이미지 파일을 목록으로 생성하고 저장
+     * 레시피 메뉴얼과 이미지 파일을 목록으로 생성
      */
-    private List<RecipeManualDto> createManuals(Recipe recipe, List<RecipeManualDto> manualDtos, List<MultipartFile> files) {
+    private List<RecipeManualDto> saveAllManuals(Recipe recipe, List<RecipeManualDto> manualDtos, List<MultipartFile> files) {
         List<RecipeManualDto> updatedManuals = new ArrayList<>();
         for (int i = 0; i < manualDtos.size(); i++) {
             if (i < files.size()) {
                 RecipeManualDto manualDto = manualDtos.get(i);
                 MultipartFile file = files.get(i);
                 try {
-                    RecipeManualDto savedManualDto = saveManual(recipe.getRecipeId(), manualDto, file);
+                    RecipeManualDto savedManualDto = saveManualWithFile(recipe, manualDto, file);
                     updatedManuals.add(savedManualDto);
                 } catch (IOException e) {
                     throw new RuntimeException(
@@ -83,17 +122,14 @@ public class RecipeCustomService {
     }
 
     /**
-     * 레시피 메뉴얼과 이미지 파일을 생성하고 저장
+     * 레시피 메뉴얼과 이미지 파일을 저장
      */
-    private RecipeManualDto saveManual(Long recipeId, RecipeManualDto manualDto, MultipartFile file) throws IOException {
-        Recipe recipe = recipeRepository.findById(recipeId)
-                .orElseThrow(() -> new EntityNotFoundException(RecipeMessage.NOT_FOUND_RECIPE.getMessage()));
-
-        Long step = getNextStepNumber(recipeId);
-        String fileUrl = fileService.saveFile(recipeId, step, file);
+    private RecipeManualDto saveManualWithFile(Recipe recipe, RecipeManualDto manualDto, MultipartFile file) throws IOException {
+        Recipe findRecipe = getRecipe(recipe.getRecipeId());
+        String fileUrl = fileService.saveFile(findRecipe.getRecipeId(), (long) manualDto.getStep(), file);
 
         RecipeManual manual = RecipeManual.builder()
-                .step(step)
+                .step((long) manualDto.getStep())
                 .manualTxt(manualDto.getManualTxt())
                 .manualImgUrl(fileUrl)
                 .recipe(recipe)
@@ -104,18 +140,9 @@ public class RecipeCustomService {
     }
 
     /**
-     * 레시피 메뉴얼의 다음 단계 번호를 반환
+     * 레시피 제료 목록을 저장
      */
-    private Long getNextStepNumber(Long recipeId) {
-        Long lastStep = manualRepository.findLastStepByRecipeId(recipeId)
-                .orElse(0L);
-        return lastStep + 1;
-    }
-
-    /**
-     * 레시피 제료 목록을 생성하고 저장
-     */
-    private void saveParts(List<RecipePartsDto> parts, Recipe savedRecipe) {
+    private void saveAllParts(List<RecipePartsDto> parts, Recipe savedRecipe) {
         parts.forEach(part -> {
             RecipeParts recipePart = RecipeParts.builder()
                     .partsName(String.valueOf(part))

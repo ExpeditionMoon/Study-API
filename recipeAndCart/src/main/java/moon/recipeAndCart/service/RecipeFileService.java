@@ -41,4 +41,10 @@ public class RecipeFileService {
 
         return fileName;
     }
+
+    public void deleteFile(String fileName) throws IOException {
+        Path fileStoragePath = Paths.get(fileDir).toAbsolutePath().normalize();
+        Path filePath = fileStoragePath.resolve(fileName).normalize();
+        Files.deleteIfExists(filePath);
+    }
 }

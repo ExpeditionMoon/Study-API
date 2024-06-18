@@ -19,4 +19,6 @@ public interface RecipeManualRepository extends JpaRepository<RecipeManual, Long
     Optional<Long> findLastStepByRecipeId(Long recipeId);
 
     Optional<RecipeManual> findManualImgUrlByRecipeRecipeIdAndStep(Long recipeId, Long step);
+
+    Optional<List<RecipeManual>> findAllByRecipeRecipeId(Long recipeId);
 }
