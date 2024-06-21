@@ -53,7 +53,7 @@ public class RecipeCommonService {
      */
     private RecipeListDto convertToRecipeDto(Recipe recipe) {
         Long step = manualRepository.findLastStepByRecipeId(recipe.getRecipeId())
-                .orElseThrow(() -> new EntityNotFoundException(RecipeMessage.NOT_FOUND_RECIPE_MANUAL.getMessage()));
+                .orElse(null);
         Optional<RecipeManual> manualImg = manualRepository.findManualImgUrlByRecipeRecipeIdAndStep(recipe.getRecipeId(), step);
         return RecipeListDto.recipeResList(recipe, manualImg);
     }

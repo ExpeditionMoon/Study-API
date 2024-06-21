@@ -33,7 +33,7 @@ public class Recipe {
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<RecipeParts> recipeParts;
 
-    @Builder
+    @Builder(toBuilder = true)
     public Recipe(Long recipeApiNo, String recipeName, String recipeType, String recipeTip, List<RecipeManual> recipeManual, List<RecipeParts> recipeParts) {
         this.recipeApiNo = recipeApiNo;
         this.recipeName = recipeName;

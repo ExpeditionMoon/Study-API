@@ -6,6 +6,7 @@ public enum RecipeMessage {
      */
     LOADED_RECIPE("레시피 성공적으로 불러왔습니다."),
     LOADED_RECIPE_LIST("레시피 목록을 성공적으로 불러왔습니다."),
+    SUCCESS_UPDATE("해당 레시피를 성공적으로 수정했습니다."),
     SUCCESS_DELETE("해당 레시피를 성공적으로 삭제했습니다."),
 
 

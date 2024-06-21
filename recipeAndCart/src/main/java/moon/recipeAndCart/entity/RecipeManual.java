@@ -26,7 +26,7 @@ public class RecipeManual {
     @JoinColumn(name = "recipe_id")
     private Recipe recipe;
 
-    @Builder
+    @Builder(toBuilder = true)
     public RecipeManual(Long step, String manualTxt, String manualImgUrl, Recipe recipe) {
         this.step = step;
         this.manualTxt = manualTxt;

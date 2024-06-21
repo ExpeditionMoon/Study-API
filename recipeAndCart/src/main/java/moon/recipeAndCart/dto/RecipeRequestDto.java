@@ -9,6 +9,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 public class RecipeRequestDto {
+    private Long recipeId;
     private String recipeName;
     private String recipeType;
     private String recipeTip;
@@ -17,6 +18,16 @@ public class RecipeRequestDto {
 
     @Builder
     public RecipeRequestDto(String recipeName, String recipeType, String recipeTip, List<RecipeManualDto> recipeManualList, List<RecipePartsDto> recipePartsList) {
+        this.recipeName = recipeName;
+        this.recipeType = recipeType;
+        this.recipeTip = recipeTip;
+        this.recipeManualList = recipeManualList;
+        this.recipePartsList = recipePartsList;
+    }
+
+    @Builder
+    public RecipeRequestDto(Long recipeId, String recipeName, String recipeType, String recipeTip, List<RecipeManualDto> recipeManualList, List<RecipePartsDto> recipePartsList) {
+        this.recipeId = recipeId;
         this.recipeName = recipeName;
         this.recipeType = recipeType;
         this.recipeTip = recipeTip;

@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -29,8 +30,20 @@ public class RecipeCustomController {
             @RequestParam("files") List<MultipartFile> files
     ) throws JsonProcessingException {
         RecipeRequestDto requestDto = new ObjectMapper().readValue(recipeData, RecipeRequestDto.class);
-        ApiResponse<RecipeResponseDto> response = customService.createRecipe(requestDto, files);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(customService.createRecipe(requestDto, files));
+    }
+
+    /**
+     * 해당 레시피의 작성자가 레시피 수정
+     */
+    @PatchMapping("/update")
+    public ResponseEntity<ApiResponse<RecipeResponseDto>> updateRecipe(
+            @RequestParam("recipeId") Long recipeId,
+            @RequestParam("recipeData") String recipeData,
+            @RequestParam("files") List<MultipartFile> files
+    ) throws IOException {
+        RecipeRequestDto requestDto = new ObjectMapper().readValue(recipeData, RecipeRequestDto.class);
+        return ResponseEntity.ok(customService.updateRecipe(recipeId, requestDto, files));
     }
 
     /**

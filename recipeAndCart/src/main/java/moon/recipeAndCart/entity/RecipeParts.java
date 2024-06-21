@@ -23,7 +23,7 @@ public class RecipeParts {
     @JoinColumn(name = "recipe_id")
     private Recipe recipe;
 
-    @Builder
+    @Builder(toBuilder = true)
     public RecipeParts(String partsName, String partsQuantity, Recipe recipe) {
         this.partsName = partsName;
         this.partsQuantity = partsQuantity;

@@ -2,6 +2,7 @@ package moon.recipeAndCart.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import moon.recipeAndCart.dto.*;
 import moon.recipeAndCart.entity.Recipe;
 import moon.recipeAndCart.entity.RecipeManual;
@@ -20,6 +21,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class RecipeCustomService {
 
     private final RecipeRepository recipeRepository;
@@ -38,14 +40,60 @@ public class RecipeCustomService {
      */
     @Transactional
     public ApiResponse<RecipeResponseDto> createRecipe(RecipeRequestDto requestDto, List<MultipartFile> files) {
+        log.info("레시피 ={},{},{},{},{}", requestDto.getRecipeTip(), requestDto.getRecipeType(), requestDto.getRecipeName(), requestDto.getRecipeManualList(), requestDto.getRecipePartsList());
         Recipe recipe = saveRecipe(requestDto);
-        List<RecipeManualDto> updatedManuals = saveAllManuals(recipe, requestDto.getRecipeManualList(), files);
-        saveAllParts(requestDto.getRecipePartsList(), recipe);
+
+        if (requestDto.getRecipeManualList() != null) {
+            saveAllManuals(recipe, requestDto.getRecipeManualList(), files);
+        }
+        if (requestDto.getRecipePartsList() != null) {
+            saveAllParts(recipe, requestDto.getRecipePartsList());
+        }
 
         return ApiResponse.success(
                 RecipeResponseDto.toResponseDto(
-                        recipe, updatedManuals, requestDto.getRecipePartsList()),
+                        recipe, requestDto.getRecipeManualList(), requestDto.getRecipePartsList()),
                 RecipeMessage.LOADED_RECIPE.getMessage()
+        );
+    }
+
+    /**
+     * 레시피 수정
+     */
+    public ApiResponse<RecipeResponseDto> updateRecipe(Long recipeId, RecipeRequestDto requestDto, List<MultipartFile> files) throws IOException {
+        log.info("레시피 ={},{},{},{},{}", requestDto.getRecipeTip(), requestDto.getRecipeType(), requestDto.getRecipeName(), requestDto.getRecipeManualList(), requestDto.getRecipePartsList());
+        Recipe findRecipe = getRecipe(recipeId);
+        log.info("find 레시피 ={}", findRecipe.getRecipeId());
+        log.info("find 레시피 ={}", findRecipe.getRecipeType());
+
+        Recipe.RecipeBuilder recipeBuilder = findRecipe.toBuilder();
+        if (requestDto.getRecipeName() != null && !requestDto.getRecipeName().equals(findRecipe.getRecipeName())) {
+            recipeBuilder.recipeName(requestDto.getRecipeName());
+        }
+        if (requestDto.getRecipeType() != null && !requestDto.getRecipeType().equals(findRecipe.getRecipeType())) {
+            recipeBuilder.recipeType(requestDto.getRecipeType());
+        }
+        if (requestDto.getRecipeTip() != null && !requestDto.getRecipeTip().equals(findRecipe.getRecipeTip())) {
+            recipeBuilder.recipeTip(requestDto.getRecipeTip());
+        }
+
+        Recipe updatedRecipe = recipeBuilder.build();
+        log.info("레시피 업데이트 시작1");
+        if (requestDto.getRecipeManualList() != null) {
+            deleteManualImgs(findRecipe.getRecipeId());
+            log.info("레시피 메뉴얼 시작3");
+            saveAllManuals(updatedRecipe, requestDto.getRecipeManualList(), files);
+        }
+
+        if (requestDto.getRecipePartsList() != null) {
+            log.info("레시피 재료 시작4");
+            saveAllParts(updatedRecipe, requestDto.getRecipePartsList());
+        }
+
+        return ApiResponse.success(
+                RecipeResponseDto.toResponseDto(
+                        findRecipe, requestDto.getRecipeManualList(), requestDto.getRecipePartsList()),
+                RecipeMessage.SUCCESS_UPDATE.getMessage()
         );
     }
 
@@ -58,18 +106,30 @@ public class RecipeCustomService {
      */
     public ApiResponse deleteRecipe(Long recipeId) {
         Recipe findRecipe = getRecipe(recipeId);
-        List<RecipeManual> findManuals = getManuals(recipeId);
-        findManuals.forEach(manual -> {
-            String fileName = manual.getManualImgUrl();
-            try {
-                fileService.deleteFile(fileName);
-            } catch (IOException e) {
-                throw new RuntimeException(RecipeMessage.ERROR_RECIPE_IMG_PROCESSING.getMessage(), e);
-            }
-        });
-
+        deleteManualImgs(recipeId);
         recipeRepository.delete(findRecipe);
         return ApiResponse.success(null, RecipeMessage.SUCCESS_DELETE.getMessage());
+    }
+
+    /**
+     * 해당 레시피 메뉴얼의 이미지 삭제
+     */
+    private void deleteManualImgs(Long recipeId) {
+        List<RecipeManual> findManuals = getManuals(recipeId);
+        log.info("레시피 이미지 시작2");
+
+        findManuals.forEach(manual -> {
+            String fileName = manual.getManualImgUrl();
+            if (fileName.equals(null)) {
+                log.info("레시피 이미지 진입2-1");
+                try {
+                    fileService.deleteFile(fileName);
+                } catch (IOException e) {
+                    throw new RuntimeException(RecipeMessage.ERROR_RECIPE_IMG_PROCESSING.getMessage(), e);
+                }
+                manualRepository.delete(manual);
+            }
+        });
     }
 
     /**
@@ -78,6 +138,14 @@ public class RecipeCustomService {
     private Recipe getRecipe(Long recipeId) {
         return recipeRepository.findById(recipeId)
                 .orElseThrow(() -> new EntityNotFoundException(RecipeMessage.NOT_FOUND_RECIPE.getMessage()));
+    }
+
+    /**
+     * 해당 레시피의 재료들을 찾아서 반환
+     */
+    private List<RecipeParts> getParts(Long recipeId) {
+        return partsRepository.findAllByRecipeRecipeId(recipeId)
+                .orElse(new ArrayList<>());
     }
 
     /**
@@ -106,16 +174,14 @@ public class RecipeCustomService {
     private List<RecipeManualDto> saveAllManuals(Recipe recipe, List<RecipeManualDto> manualDtos, List<MultipartFile> files) {
         List<RecipeManualDto> updatedManuals = new ArrayList<>();
         for (int i = 0; i < manualDtos.size(); i++) {
-            if (i < files.size()) {
-                RecipeManualDto manualDto = manualDtos.get(i);
-                MultipartFile file = files.get(i);
-                try {
-                    RecipeManualDto savedManualDto = saveManualWithFile(recipe, manualDto, file);
-                    updatedManuals.add(savedManualDto);
-                } catch (IOException e) {
-                    throw new RuntimeException(
-                            RecipeMessage.ERROR_RECIPE_IMG_PROCESSING.getMessage(), e);
-                }
+            RecipeManualDto manualDto = manualDtos.get(i);
+            MultipartFile file = (files != null && i < files.size()) ? files.get(i) : null;
+            try {
+                RecipeManualDto savedManualDto = saveManualWithFile(recipe, manualDto, file);
+                updatedManuals.add(savedManualDto);
+            } catch (IOException e) {
+                throw new RuntimeException(
+                        RecipeMessage.ERROR_RECIPE_IMG_PROCESSING.getMessage(), e);
             }
         }
         return updatedManuals;
@@ -142,7 +208,7 @@ public class RecipeCustomService {
     /**
      * 레시피 제료 목록을 저장
      */
-    private void saveAllParts(List<RecipePartsDto> parts, Recipe savedRecipe) {
+    private void saveAllParts(Recipe savedRecipe, List<RecipePartsDto> parts) {
         parts.forEach(part -> {
             RecipeParts recipePart = RecipeParts.builder()
                     .partsName(String.valueOf(part))
